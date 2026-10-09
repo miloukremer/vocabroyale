@@ -221,8 +221,16 @@
       justify-content: space-between;
       padding: 4px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(239, 68, 68, 0.8);
-      transition: left 0.22s cubic-bezier(0.2, 0.8, 0.25, 1);
+      transition: left 0.22s cubic-bezier(0.2, 0.8, 0.25, 1), bottom 0.5s ease-in, transform 0.5s ease-in, opacity 0.4s 0.1s ease-in;
       z-index: 10;
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .mario-car.drive-forward {
+      bottom: 250px; /* Rijdt omhoog richting het poortje */
+      transform: scale(0.3); /* Wordt kleiner in de verte */
+      opacity: 0; /* Verdwijnt als hij door de poort is */
     }
 
     .car-spoiler { width: 110%; height: 8px; background: #111; border-radius: 3px; }
@@ -691,9 +699,15 @@
     document.addEventListener('keydown', (e) => {
       // Mario Kart Besturing
       if (activeGameMode && activeGameMode.id === 'car_highway' && !document.getElementById('screenGame').classList.contains('hidden')) {
+        const driveBtn = document.querySelector('.btn-drive');
+        if (driveBtn && driveBtn.disabled) return; // Negeer input tijdens de rij-animatie
+
         if (e.key === 'ArrowLeft' || e.key === 'a') moveCar(-1);
         if (e.key === 'ArrowRight' || e.key === 'd') moveCar(1);
-        if (e.key === 'Enter' || e.key === ' ') driveDriveAndCheck();
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          driveDriveAndCheck();
+        }
       }
     });
 
@@ -874,13 +888,25 @@
   function setupMarioKartGame(q) {
     document.getElementById('carGameBox').classList.remove('hidden');
     currentCarLane = 1;
+    
+    const car = document.getElementById('playerCar');
+    car.style.transition = 'none'; // Verwijder animatie voor instant reset naar startpositie
+    car.classList.remove('drive-forward');
     updateCarPosition();
+    
+    // Herstel de animatie-transition na een korte vertraging en activeer knoppen
+    setTimeout(() => {
+      car.style.transition = 'left 0.22s cubic-bezier(0.2, 0.8, 0.25, 1), bottom 0.5s ease-in, transform 0.5s ease-in, opacity 0.4s 0.1s ease-in';
+      document.querySelectorAll('.controls-row button').forEach(b => b.disabled = false);
+    }, 50);
 
     // Randomize de opties voor de poortjes
     let displayOpts = [...q.opts].sort(() => Math.random() - 0.5);
     
     for (let i = 0; i < 3; i++) {
-      document.getElementById(`gate${i}`).innerText = displayOpts[i] || '---';
+      const gate = document.getElementById(`gate${i}`);
+      gate.innerText = displayOpts[i] || '---';
+      gate.style.backgroundColor = 'rgba(15, 23, 42, 0.9)'; // Reset de poortkleur
     }
   }
 
@@ -941,10 +967,25 @@
 
   function driveDriveAndCheck() {
     const q = currentQuestions[currentQIndex];
-    const gateText = document.getElementById(`gate${currentCarLane}`).innerText;
+    const gate = document.getElementById(`gate${currentCarLane}`);
+    const gateText = gate.innerText;
+
+    // Knoppen blokkeren tijdens de animatie zodat je niet dubbel kan klikken
+    document.querySelectorAll('.controls-row button').forEach(b => b.disabled = true);
+    
+    // Auto animatie starten
+    const car = document.getElementById('playerCar');
+    car.classList.add('drive-forward');
 
     let isCorrect = q.a.some(ans => normalizeText(ans) === normalizeText(gateText));
-    processResult(isCorrect, q.rule, q.a[0]);
+    
+    // Wacht tot de auto bij het poortje is (500ms) voordat het antwoord laadt
+    setTimeout(() => {
+      // Poortje kleurt mee ter visuele feedback (groen of rood)
+      gate.style.backgroundColor = isCorrect ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)';
+      
+      processResult(isCorrect, q.rule, q.a[0]);
+    }, 500);
   }
 
   function submitInputAnswer() {
