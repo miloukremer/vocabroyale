@@ -1,0 +1,1040 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grammar Kart Quest - 3 VWO</title>
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --card-bg: #151d30;
+      --card-inner: #1e293b;
+      --accent-purple: #8b5cf6;
+      --accent-blue: #3b82f6;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-gold: #f59e0b;
+      --accent-pink: #ec4899;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #243049;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 15px;
+    }
+
+    .game-card {
+      background-color: var(--card-bg);
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 960px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-dark);
+      padding: 12px 20px;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--accent-blue);
+      font-weight: 600;
+    }
+
+    .breadcrumb span {
+      color: var(--text-muted);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .selection-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .item-card {
+      background: var(--card-inner);
+      border: 2px solid var(--border-color);
+      border-radius: 14px;
+      padding: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    .item-card:hover {
+      border-color: var(--accent-purple);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(139, 92, 246, 0.25);
+    }
+
+    .item-card.selected {
+      border-color: var(--accent-green);
+      background: linear-gradient(135deg, #1e293b 0%, #064e3b 100%);
+    }
+
+    .item-card.theory {
+      border-color: var(--accent-gold);
+      background: linear-gradient(135deg, #1e293b 0%, #3f2d04 100%);
+    }
+
+    .item-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .item-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* MARIO KART STYLE ROAD RACER CONTAINER */
+    .mario-road-wrapper {
+      position: relative;
+      width: 100%;
+      height: 320px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 4px solid #334155;
+      background: #15803d; /* Gras zijkanten */
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    .road-asphalt {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 15%;
+      right: 15%;
+      background-color: #262626;
+      border-left: 6px solid #f59e0b;
+      border-right: 6px solid #f59e0b;
+      display: flex;
+    }
+
+    /* Moving Road Lines Animation */
+    .road-asphalt.driving {
+      background-image: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 30px,
+        rgba(255, 255, 255, 0.2) 30px,
+        rgba(255, 255, 255, 0.2) 60px
+      );
+      animation: roadScroll 0.4s linear infinite;
+    }
+
+    @keyframes roadScroll {
+      0% { background-position-y: 0px; }
+      100% { background-position-y: 60px; }
+    }
+
+    .lane-divider {
+      flex: 1;
+      border-right: 4px dashed rgba(255, 255, 255, 0.6);
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 15px;
+    }
+
+    .lane-divider:last-child {
+      border-right: none;
+    }
+
+    .kart-gate {
+      background: rgba(15, 23, 42, 0.9);
+      border: 2px solid var(--accent-gold);
+      border-radius: 12px;
+      padding: 10px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-align: center;
+      width: 90%;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
+      z-index: 5;
+    }
+
+    /* Mario Kart Player Car Sprite */
+    .mario-car {
+      position: absolute;
+      bottom: 20px;
+      width: 54px;
+      height: 70px;
+      background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+      border-radius: 14px 14px 8px 8px;
+      border: 2px solid #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(239, 68, 68, 0.8);
+      transition: left 0.22s cubic-bezier(0.2, 0.8, 0.25, 1);
+      z-index: 10;
+    }
+
+    .car-spoiler {
+      width: 110%;
+      height: 8px;
+      background: #111;
+      border-radius: 3px;
+    }
+
+    .car-windshield {
+      width: 80%;
+      height: 18px;
+      background: #38bdf8;
+      border-radius: 4px;
+      border: 1px solid #fff;
+    }
+
+    .car-wheels {
+      display: flex;
+      justify-content: space-between;
+      width: 120%;
+    }
+
+    .wheel {
+      width: 8px;
+      height: 16px;
+      background: #000;
+      border-radius: 2px;
+    }
+
+    /* Control Buttons */
+    .controls-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .btn-steer {
+      background: var(--card-inner);
+      border: 2px solid var(--accent-blue);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.15s;
+    }
+
+    .btn-steer:active {
+      transform: scale(0.95);
+      background: var(--accent-blue);
+    }
+
+    .btn-drive {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s;
+    }
+
+    .btn-drive:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+    }
+
+    /* Theory Box */
+    .theory-box {
+      background: var(--bg-dark);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid var(--accent-gold);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      line-height: 1.5;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .theory-box h3 {
+      color: var(--accent-gold);
+      font-size: 1.2rem;
+    }
+
+    .example-tag {
+      background: var(--card-inner);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: monospace;
+      color: #38bdf8;
+    }
+
+    /* Game Arena */
+    .arena-box {
+      background: var(--bg-dark);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .question-text {
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .btn-opt {
+      background: var(--card-inner);
+      border: 2px solid var(--border-color);
+      color: var(--text-main);
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .btn-opt:hover {
+      background: #334155;
+      border-color: var(--accent-purple);
+    }
+
+    .input-box {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 2px solid var(--border-color);
+      background: var(--card-inner);
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .feedback-panel {
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      display: none;
+    }
+
+    .feedback-panel.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .feedback-panel.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+    }
+
+    .btn-action {
+      background: var(--accent-purple);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background: #7c3aed;
+    }
+
+    .btn-back {
+      background: none;
+      border: none;
+      color: var(--accent-blue);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+<div class="game-card">
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="breadcrumb" id="breadcrumbPath">
+      <span>Onderwerpen</span>
+    </div>
+    <div style="display: flex; gap: 15px;">
+      <div class="stat-item">❤️ <span id="hpVal">❤️❤️❤️</span></div>
+      <div class="stat-item">⚡ <span id="streakVal">0</span></div>
+      <div class="stat-item">⭐ <span id="scoreVal">0</span></div>
+    </div>
+  </div>
+
+  <!-- STAP 1: ONDERWERPEN SELECTEREN -->
+  <div id="screenTopics">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <h2>Kies Grammatica Onderwerpen 📚</h2>
+      <button class="btn-action" style="width: auto; padding: 10px 20px;" onclick="confirmMultiTopics()">
+        Start met Geselecteerde Onderwerpen 🚀
+      </button>
+    </div>
+    <p style="color: var(--text-muted); margin-bottom: 16px; font-size: 0.9rem;">
+      Alle eerdere en nieuwe onderwerpen staan hieronder. Kies er één of meerdere!
+    </p>
+    <div class="selection-grid" id="topicsGrid"></div>
+  </div>
+
+  <!-- STAP 2: SPELTYPE SELECTEREN -->
+  <div id="screenGames" class="hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2>Kies een Logisch Speltype 🎮</h2>
+      <button class="btn-back" onclick="goToStep('topics')">← Terug naar Onderwerpen</button>
+    </div>
+    <div class="selection-grid" id="gamesGrid"></div>
+  </div>
+
+  <!-- STAP 3: LEVEL SELECTEREN -->
+  <div id="screenLevels" class="hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2>Kies een Niveau / Level 🎯</h2>
+      <button class="btn-back" onclick="goToStep('games')">← Terug naar Speltypes</button>
+    </div>
+    <div class="selection-grid" id="levelsGrid"></div>
+  </div>
+
+  <!-- LEVEL 1: THEORIE & UITLEG -->
+  <div id="screenTheory" class="hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2 id="theoryTopicTitle">Level 1 — Uitleg & Theorie 📖</h2>
+      <button class="btn-back" onclick="goToStep('levels')">← Terug naar Levels</button>
+    </div>
+
+    <div class="theory-box" id="theoryContent"></div>
+
+    <div class="arena-box" style="margin-top: 10px; border-color: var(--accent-gold);">
+      <div class="question-header">
+        <span>LEVEL 1 SIMPELE TESTVRAAG</span>
+      </div>
+      <div class="question-text" id="lvl1QuestionText">Oefenvraag...</div>
+      <div class="options-grid" id="lvl1OptionsGrid"></div>
+      <div class="feedback-panel" id="lvl1Feedback"></div>
+    </div>
+
+    <button class="btn-action" style="margin-top: 10px;" onclick="startNextLevelFromTheory()">
+      Ik snap het! Naar Level 2 (Normale Oefeningen) →
+    </button>
+  </div>
+
+  <!-- GAME ARENA -->
+  <div id="screenGame" class="hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-size: 0.85rem; color: var(--text-muted);" id="qProgress">Vraag 1/10</span>
+      <button class="btn-back" onclick="goToStep('levels')">← Level Verlaten</button>
+    </div>
+
+    <div class="arena-box">
+      <div class="question-header">
+        <span id="qCategory">CATEGORY</span>
+        <span id="qModeBadge" style="color: var(--accent-pink);">GAME MODE</span>
+      </div>
+      <div class="question-text" id="qText">Question...</div>
+
+      <!-- MARIO KART HIGHWAY RACER -->
+      <div id="carGameBox" class="hidden">
+        <div class="mario-road-wrapper">
+          <div class="road-asphalt driving" id="roadElement">
+            <div class="lane-divider" id="lane0"><div class="kart-gate" id="gate0">Optie A</div></div>
+            <div class="lane-divider" id="lane1"><div class="kart-gate" id="gate1">Optie B</div></div>
+            <div class="lane-divider" id="lane2"><div class="kart-gate" id="gate2">Optie C</div></div>
+          </div>
+          <div class="mario-car" id="playerCar" style="left: 45%;">
+            <div class="car-spoiler"></div>
+            <div class="car-windshield"></div>
+            <div class="car-wheels">
+              <div class="wheel"></div>
+              <div class="wheel"></div>
+            </div>
+          </div>
+        </div>
+        <div class="controls-row">
+          <button class="btn-steer" onclick="moveCar(-1)">⬅️ Links Sturen</button>
+          <button class="btn-drive" onclick="driveDriveAndCheck()">Rijd er doorheen! 🚗💨</button>
+          <button class="btn-steer" onclick="moveCar(1)">Rechts Sturen ➡️</button>
+        </div>
+      </div>
+
+      <!-- MULTIPLE CHOICE -->
+      <div class="options-grid hidden" id="mcBox"></div>
+
+      <!-- FILL IN THE BLANK / GRAMMAR DETECTIVE -->
+      <div id="inputBox" class="hidden" style="display: flex; flex-direction: column; gap: 10px;">
+        <input type="text" class="input-box" id="userAnswerInput" placeholder="Typ hier je antwoord of de verbeterde zin..." autocomplete="off">
+        <button class="btn-action" onclick="submitInputAnswer()">Controleer Antwoord</button>
+      </div>
+    </div>
+
+    <div class="feedback-panel" id="feedbackPanel"></div>
+    <button class="btn-action hidden" id="nextBtn" onclick="nextQuestion()">Volgende Vraag →</button>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="screenResult" class="hidden" style="text-align: center; padding: 30px 0;">
+    <span style="font-size: 4rem;" id="resEmoji">🏆</span>
+    <h2 style="font-size: 2rem; margin: 10px 0;" id="resTitle">Gefeliciteerd!</h2>
+    <p style="color: var(--text-muted); margin-bottom: 20px;" id="resBody"></p>
+    <button class="btn-action" onclick="goToStep('topics')">Terug naar Onderwerpen</button>
+  </div>
+
+</div>
+
+<script>
+  // ONDERWERPEN DATABASE (BEHOUDEN + BIJGEWERKT)
+  const topicsData = [
+    {
+      id: 'past_simple',
+      title: 'Past Simple',
+      desc: 'Verleden tijd (-ed of 2e rij onregelmatig)',
+      icon: '📜',
+      theory: `
+        <h3>Past Simple (Verleden Tijd)</h3>
+        <p>De Past Simple gebruik je voor iets dat in het verleden is gebeurd en helemaal afgelopen is.</p>
+        <p><strong>Regelmatig (+ed):</strong> play → played | walk → walked | watch → watched</p>
+        <p><strong>Onregelmatig (2e rij):</strong> go → went | see → saw | eat → ate | have → had</p>
+        <p><strong>Signaalwoorden:</strong> <em>yesterday, last week, last year, two days ago, in 2023, when I was young</em>.</p>
+      `,
+      sampleQ: { q: "Yesterday, I ___ to school.", opts: ["A. go", "B. went", "C. gone"], a: "B. went" }
+    },
+    {
+      id: 'present_perfect',
+      title: 'Present Perfect',
+      desc: 'have/has + voltooid deelwoord',
+      icon: '✨',
+      theory: `
+        <h3>Present Perfect</h3>
+        <p>Gebruik je voor een ervaring in je leven of iets uit het verleden met resultaat in het HEDEN.</p>
+        <p><strong>Formule:</strong> <code>have / has + past participle (3e rij / -ed)</code></p>
+        <p><strong>Veelgebruikte woorden:</strong> <em>ever, never, already, just, yet, since, for</em>.</p>
+      `,
+      sampleQ: { q: "She ___ never ___ sushi.", opts: ["A. has / eaten", "B. have / ate", "C. did / eat"], a: "A. has / eaten" }
+    },
+    {
+      id: 'past_vs_perfect',
+      title: 'Past Simple vs Present Perfect',
+      desc: 'Afgesloten verleden (went) vs Ervaring/Resultaat (has gone)',
+      icon: '⚖️',
+      theory: `
+        <h3>Past Simple vs Present Perfect</h3>
+        <p><strong>Past Simple:</strong> Afgesloten tijdstip (<em>yesterday, last year, in 2024</em>) → <span class="example-tag">I visited London last year.</span></p>
+        <p><strong>Present Perfect:</strong> Geen specifiek moment / ervaring / resultaat nu (<em>ever, never, already, just, yet, since, for</em>) → <span class="example-tag">I have visited London three times.</span></p>
+      `,
+      sampleQ: { q: "I ___ to Paris last summer.", opts: ["A. have been", "B. went", "C. have gone"], a: "B. went" }
+    },
+    {
+      id: 'adj_adv',
+      title: 'Adjectives & Adverbs',
+      desc: 'Bijvoeglijke naamwoorden & bijwoorden (-ly)',
+      icon: '🎨',
+      theory: `
+        <h3>Adjectives & Adverbs</h3>
+        <p><strong>Adjective (Bijvoeglijk naamwoord):</strong> Zegt iets over een zelfstandig naamwoord (a <em>quick</em> car).</p>
+        <p><strong>Adverb (Bijwoord):</strong> Zegt iets over een werkwoord, bijvoeglijk naamwoord of de hele zin (he drives <em>quickly</em>).</p>
+      `,
+      sampleQ: { q: "She sings ___.", opts: ["A. beautiful", "B. beautifully", "C. beautify"], a: "B. beautifully" }
+    }
+  ];
+
+  // GAME MODI
+  const gameTypesData = [
+    { id: 'car_highway', title: 'Mario Kart Grammar Racer 🏎️💨', desc: 'Rijd met je auto over de racebaan en ram de poort met het juiste antwoord!' },
+    { id: 'speed_run', title: 'Grammar Speed Run ⚡', desc: 'Snelheidsvragen met directe opties en puntenvermenigvuldiger.' },
+    { id: 'fill_in', title: 'Grammar Detective & Invullen 🔎', desc: 'Typ het juiste antwoord of verbeter de foute grammaticazinnen.' }
+  ];
+
+  // NIVEAUS
+  const levelsDifficulty = [
+    { id: 'lvl1', title: 'Level 1 — Uitleg & Simpele Oefening 📖', desc: 'Regels bekijken met direct een opwarmvraag.', isTheory: true },
+    { id: 'lvl2', title: 'Level 2 — Normale Oefeningen 🟢', desc: 'Basisoefeningen: werkwoorden invullen, vragen & negatief maken.' },
+    { id: 'lvl3', title: 'Level 3 — Moeilijke Oefeningen & Bosses 🔴', desc: 'Grammar Detective, samengestelde zinnen en Boss Vragen.' }
+  ];
+
+  // VOLLEDIGE VRAGENBANK
+  const questionBank = [
+    // --- PAST SIMPLE LEVEL 2 ---
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "I ___ (visit) my grandmother yesterday.", a: ["visited"], opts: ["A. visit", "B. visited", "C. have visited"], rule: "Past Simple regelmatig: visit + ed." },
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "She ___ (play) tennis last Saturday.", a: ["played"], opts: ["A. play", "B. played", "C. plays"], rule: "Past Simple regelmatig: play + ed." },
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "We ___ (watch) a movie last night.", a: ["watched"], opts: ["A. watch", "B. watched", "C. watching"], rule: "Past Simple regelmatig: watch + ed." },
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "He ___ (go) to London last summer.", a: ["went"], opts: ["A. go", "B. went", "C. gone"], rule: "Onregelmatig werkwoord: go -> went." },
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "They ___ (have) a test on Monday.", a: ["had"], opts: ["A. have", "B. had", "C. has"], rule: "Onregelmatig werkwoord: have -> had." },
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "I ___ (see) my best friend yesterday.", a: ["saw"], opts: ["A. see", "B. saw", "C. seen"], rule: "Onregelmatig werkwoord: see -> saw." },
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "My brother ___ (buy) a new bike last week.", a: ["bought"], opts: ["A. buy", "B. bought", "C. buys"], rule: "Onregelmatig werkwoord: buy -> bought." },
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "We ___ (eat) pizza two days ago.", a: ["ate"], opts: ["A. eat", "B. ate", "C. eaten"], rule: "Onregelmatig werkwoord: eat -> ate." },
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "Maak negatief: She visited Paris last year. → She ___ Paris last year.", a: ["didn't visit", "did not visit"], opts: ["A. didn't visit", "B. didn't visited", "C. hasn't visited"], rule: "Negatief in de Past Simple = didn't + heel werkwoord." },
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "Maak negatief: He played football yesterday. → He ___ football yesterday.", a: ["didn't play", "did not play"], opts: ["A. didn't played", "B. didn't play", "C. doesn't play"], rule: "Negatief in de Past Simple = didn't + heel werkwoord." },
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "Maak een vraag: You watched the movie. → ___ you ___ the movie?", a: ["Did / watch", "did watch", "did / watch"], opts: ["A. Did / watch", "B. Did / watched", "C. Have / watched"], rule: "Vraagzinnen in de Past Simple beginnen met Did + heel werkwoord." },
+    { topic: 'past_simple', level: 'lvl2', mode: 'fill_in', q: "Maak een vraag: She went to school. → ___ she ___ to school?", a: ["Did / go", "did go", "did / go"], opts: ["A. Did / went", "B. Did / go", "C. Does / go"], rule: "Vraagzinnen in de Past Simple beginnen met Did + heel werkwoord." },
+
+    // --- PAST SIMPLE LEVEL 3 ---
+    { topic: 'past_simple', level: 'lvl3', mode: 'fill_in', q: "When I ___ (arrive) home, I ___ (take) off my shoes and ___ (sit) on the sofa.", a: ["arrived / took / sat", "arrived took sat"], opts: ["A. arrived / took / sat", "B. arrive / take / sit", "C. arrived / taken / sat"], rule: "Reeks van acties in het verleden: arrived, took, sat." },
+    { topic: 'past_simple', level: 'lvl3', mode: 'fill_in', q: "She ___ (not understand) the question, so she ___ (ask) the teacher for help.", a: ["didn't understand / asked"], opts: ["A. didn't understand / asked", "B. didn't understood / asked", "C. not understood / asked"], rule: "didn't understand ... asked." },
+    { topic: 'past_simple', level: 'lvl3', mode: 'fill_in', q: "We ___ (go) to the beach, but it ___ (start) raining after an hour.", a: ["went / started"], opts: ["A. went / started", "B. go / started", "C. went / start"], rule: "went ... started." },
+    { topic: 'past_simple', level: 'lvl3', mode: 'fill_in', q: "Grammar Detective (Verbeter): She goed to the supermarket yesterday.", a: ["She went to the supermarket yesterday.", "She went to the supermarket yesterday"], opts: ["A. She went to the supermarket yesterday.", "B. She goed to the supermarket.", "C. She has gone to supermarket."], rule: "Goed bestaat niet -> went." },
+    { topic: 'past_simple', level: 'lvl3', mode: 'fill_in', q: "Grammar Detective (Verbeter): I didn't went to school.", a: ["I didn't go to school.", "I didn't go to school"], opts: ["A. I didn't go to school.", "B. I didn't went to school.", "C. I wasn't go to school."], rule: "Na didn't komt het hele werkwoord (go)." },
+
+    // --- PRESENT PERFECT LEVEL 2 ---
+    { topic: 'present_perfect', level: 'lvl2', mode: 'fill_in', q: "I ___ never ___ (be) to Spain.", a: ["have / been", "have been"], opts: ["A. have / been", "B. has / been", "C. did / be"], rule: "I + have + been." },
+    { topic: 'present_perfect', level: 'lvl2', mode: 'fill_in', q: "She ___ already ___ (finish) her homework.", a: ["has / finished", "has finished"], opts: ["A. has / finished", "B. have / finished", "C. was / finish"], rule: "She + has + finished." },
+    { topic: 'present_perfect', level: 'lvl2', mode: 'mc', q: "I ___ never been to France.", opts: ["A. have", "B. has", "C. did"], a: "A. have", rule: "Bij 'I' gebruik je 'have'." },
+    { topic: 'present_perfect', level: 'lvl2', mode: 'mc', q: "He ___ already finished his homework.", opts: ["A. have", "B. has", "C. did"], a: "B. has", rule: "Bij 'He' gebruik je 'has'." },
+
+    // --- PRESENT PERFECT LEVEL 3 ---
+    { topic: 'present_perfect', level: 'lvl3', mode: 'fill_in', q: "She ___ (never / see) such a beautiful place.", a: ["has never seen"], opts: ["A. has never seen", "B. have never seen", "C. never saw"], rule: "She + has + never + seen." },
+    { topic: 'present_perfect', level: 'lvl3', mode: 'fill_in', q: "Grammar Detective (Verbeter): She have never been to London.", a: ["She has never been to London.", "She has never been to London"], opts: ["A. She has never been to London.", "B. She have never went.", "C. She was never been."], rule: "She krijgt 'has'." },
+
+    // --- PAST SIMPLE VS PRESENT PERFECT LEVEL 2 ---
+    { topic: 'past_vs_perfect', level: 'lvl2', mode: 'mc', q: "I ___ my homework yesterday.", opts: ["A. have finished", "B. finished", "C. have finish"], a: "B. finished", rule: "Afgesloten tijdstip 'yesterday' -> Past Simple." },
+    { topic: 'past_vs_perfect', level: 'lvl2', mode: 'mc', q: "We ___ that museum three times.", opts: ["A. visited", "B. have visited", "C. were visiting"], a: "B. have visited", rule: "Ervaring -> Present Perfect." },
+
+    // --- PAST VS PERFECT LEVEL 3 ---
+    { topic: 'past_vs_perfect', level: 'lvl3', mode: 'mc', q: "I ___ my phone. Can you help me look for it?", opts: ["A. lost", "B. have lost", "C. lose"], a: "B. have lost", rule: "Resultaat nu -> Present Perfect." },
+    { topic: 'past_vs_perfect', level: 'lvl3', mode: 'mc', q: "🔥 BOSS QUESTION: I ___ this movie before, but I ___ it again last night because I really liked it.", opts: ["A. have seen / watched", "B. saw / have watched", "C. have seen / have watched"], a: "A. have seen / watched", rule: "before = ervaring (Present Perfect). last night = afgesloten moment (Past Simple)." },
+    { topic: 'past_vs_perfect', level: 'lvl3', mode: 'mc', q: "🔥 EINDBAAS-VRAAG: How many times ___ you ___ to London?", opts: ["A. did / go", "B. have / been", "C. did / been"], a: "B. have / been", rule: "Aantal keren ervaringen vragen -> Present Perfect." },
+
+    // --- ADJECTIVES & ADVERBS LEVEL 2 & 3 ---
+    { topic: 'adj_adv', level: 'lvl2', mode: 'mc', q: "He is a ___ driver.", opts: ["A. careful", "B. carefully", "C. care"], a: "A. careful", rule: "Zegt iets over de bestuurder (zelfstandig naamwoord) -> Adjective." },
+    { topic: 'adj_adv', level: 'lvl2', mode: 'mc', q: "He drives ___.", opts: ["A. careful", "B. carefully", "C. care"], a: "B. carefully", rule: "Zegt iets over het rijden (werkwoord) -> Adverb (-ly)." }
+  ];
+
+  // App State
+  let selectedTopicIds = ['past_simple'];
+  let activeGameMode = null;
+  let activeLevel = null;
+  let currentQuestions = [];
+  let currentQIndex = 0;
+  let score = 0;
+  let streak = 0;
+  let hp = 3;
+
+  // Mario Kart Steering State (0 = Links, 1 = Midden, 2 = Rechts)
+  let currentCarLane = 1; 
+  const carPositionsLeft = ['22%', '45%', '68%'];
+
+  function initApp() {
+    renderTopics();
+    updateStats();
+
+    // Toetsenbordbesturing voor Mario Kart mode
+    document.addEventListener('keydown', (e) => {
+      if (activeGameMode && activeGameMode.id === 'car_highway' && !document.getElementById('screenGame').classList.contains('hidden')) {
+        if (e.key === 'ArrowLeft' || e.key === 'a') moveCar(-1);
+        if (e.key === 'ArrowRight' || e.key === 'd') moveCar(1);
+        if (e.key === 'Enter' || e.key === ' ') driveDriveAndCheck();
+      }
+    });
+  }
+
+  function goToStep(step) {
+    document.getElementById('screenTopics').classList.add('hidden');
+    document.getElementById('screenGames').classList.add('hidden');
+    document.getElementById('screenLevels').classList.add('hidden');
+    document.getElementById('screenTheory').classList.add('hidden');
+    document.getElementById('screenGame').classList.add('hidden');
+    document.getElementById('screenResult').classList.add('hidden');
+
+    const path = document.getElementById('breadcrumbPath');
+
+    if (step === 'topics') {
+      document.getElementById('screenTopics').classList.remove('hidden');
+      path.innerHTML = '<span>Onderwerpen</span>';
+    } else if (step === 'games') {
+      document.getElementById('screenGames').classList.remove('hidden');
+      const topicNames = selectedTopicIds.map(id => topicsData.find(t => t.id === id).title).join(' + ');
+      path.innerHTML = `<span style="cursor:pointer" onclick="goToStep('topics')">Onderwerpen</span> > <span>${topicNames}</span>`;
+      renderGameTypes();
+    } else if (step === 'levels') {
+      document.getElementById('screenLevels').classList.remove('hidden');
+      path.innerHTML = `<span style="cursor:pointer" onclick="goToStep('games')">Speltypes</span> > <span>${activeGameMode.title}</span>`;
+      renderLevels();
+    }
+  }
+
+  function renderTopics() {
+    const grid = document.getElementById('topicsGrid');
+    grid.innerHTML = '';
+
+    topicsData.forEach(t => {
+      const isSelected = selectedTopicIds.includes(t.id);
+      const card = document.createElement('div');
+      card.className = `item-card ${isSelected ? 'selected' : ''}`;
+      card.onclick = () => toggleTopicSelection(t.id);
+      card.innerHTML = `
+        <div class="item-title">${t.icon} ${t.title} ${isSelected ? '✅' : ''}</div>
+        <div class="item-desc">${t.desc}</div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function toggleTopicSelection(id) {
+    if (selectedTopicIds.includes(id)) {
+      if (selectedTopicIds.length > 1) {
+        selectedTopicIds = selectedTopicIds.filter(item => item !== id);
+      }
+    } else {
+      selectedTopicIds.push(id);
+    }
+    renderTopics();
+  }
+
+  function confirmMultiTopics() {
+    goToStep('games');
+  }
+
+  function renderGameTypes() {
+    const grid = document.getElementById('gamesGrid');
+    grid.innerHTML = '';
+
+    gameTypesData.forEach(g => {
+      const card = document.createElement('div');
+      card.className = 'item-card';
+      card.onclick = () => {
+        activeGameMode = g;
+        goToStep('levels');
+      };
+      card.innerHTML = `
+        <div class="item-title">${g.title}</div>
+        <div class="item-desc">${g.desc}</div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function renderLevels() {
+    const grid = document.getElementById('levelsGrid');
+    grid.innerHTML = '';
+
+    levelsDifficulty.forEach(l => {
+      const card = document.createElement('div');
+      card.className = `item-card ${l.isTheory ? 'theory' : ''}`;
+      card.onclick = () => {
+        activeLevel = l;
+        if (l.isTheory) {
+          showTheoryScreen();
+        } else {
+          startQuest();
+        }
+      };
+      card.innerHTML = `
+        <div class="item-title">${l.title}</div>
+        <div class="item-desc">${l.desc}</div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function showTheoryScreen() {
+    document.getElementById('screenLevels').classList.add('hidden');
+    document.getElementById('screenTheory').classList.remove('hidden');
+
+    let combinedTheory = '';
+    selectedTopicIds.forEach(id => {
+      const top = topicsData.find(t => t.id === id);
+      combinedTheory += top.theory + '<hr style="border-color: var(--border-color); margin: 15px 0;">';
+    });
+
+    document.getElementById('theoryTopicTitle').innerText = `Level 1 — Uitleg & Theorie`;
+    document.getElementById('theoryContent').innerHTML = combinedTheory;
+
+    const firstTopic = topicsData.find(t => t.id === selectedTopicIds[0]);
+    const sample = firstTopic.sampleQ;
+    document.getElementById('lvl1QuestionText').innerText = sample.q;
+    
+    const optsGrid = document.getElementById('lvl1OptionsGrid');
+    optsGrid.innerHTML = '';
+    document.getElementById('lvl1Feedback').style.display = 'none';
+
+    sample.opts.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-opt';
+      btn.innerText = opt;
+      btn.onclick = () => {
+        const feedback = document.getElementById('lvl1Feedback');
+        feedback.style.display = 'block';
+        if (opt === sample.a) {
+          feedback.className = 'feedback-panel success';
+          feedback.innerHTML = `🎉 <strong>Goed gedaan!</strong> Dat is de juiste keuze!`;
+        } else {
+          feedback.className = 'feedback-panel error';
+          feedback.innerHTML = `❌ Het juiste antwoord is <strong>${sample.a}</strong>. Bekijk de uitleg hierboven nog eens.`;
+        }
+      };
+      optsGrid.appendChild(btn);
+    });
+  }
+
+  function startNextLevelFromTheory() {
+    activeLevel = levelsDifficulty[1];
+    startQuest();
+  }
+
+  function startQuest() {
+    document.getElementById('screenLevels').classList.add('hidden');
+    document.getElementById('screenTheory').classList.add('hidden');
+    document.getElementById('screenGame').classList.remove('hidden');
+
+    currentQuestions = questionBank.filter(q => selectedTopicIds.includes(q.topic) && q.level === activeLevel.id);
+    currentQuestions.sort(() => Math.random() - 0.5);
+
+    if (currentQuestions.length === 0) {
+      currentQuestions = questionBank.filter(q => selectedTopicIds.includes(q.topic));
+    }
+
+    currentQIndex = 0;
+    hp = 3;
+    updateStats();
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    const q = currentQuestions[currentQIndex];
+
+    document.getElementById('qProgress').innerText = `Vraag ${currentQIndex + 1}/${currentQuestions.length}`;
+    document.getElementById('qCategory').innerText = selectedTopicIds.join(' + ').toUpperCase();
+    document.getElementById('qModeBadge').innerText = activeGameMode.title;
+    document.getElementById('qText').innerText = q.q;
+    document.getElementById('feedbackPanel').style.display = 'none';
+    document.getElementById('nextBtn').classList.add('hidden');
+
+    document.getElementById('mcBox').classList.add('hidden');
+    document.getElementById('inputBox').classList.add('hidden');
+    document.getElementById('carGameBox').classList.add('hidden');
+
+    let options = q.opts;
+    if (!options) {
+      options = [Array.isArray(q.a) ? q.a[0] : q.a, "Optie B", "Optie C"].sort(() => Math.random() - 0.5);
+    }
+
+    if (activeGameMode.id === 'car_highway') {
+      setupMarioKartGame(q, options);
+    } else if (activeGameMode.id === 'speed_run' || q.mode === 'mc') {
+      const mcBox = document.getElementById('mcBox');
+      mcBox.classList.remove('hidden');
+      mcBox.innerHTML = '';
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-opt';
+        btn.innerText = opt;
+        btn.onclick = () => checkMcAnswer(opt, q);
+        mcBox.appendChild(btn);
+      });
+    } else {
+      const inputBox = document.getElementById('inputBox');
+      inputBox.classList.remove('hidden');
+      const input = document.getElementById('userAnswerInput');
+      input.value = '';
+      input.disabled = false;
+      input.focus();
+    }
+  }
+
+  function setupMarioKartGame(q, options) {
+    document.getElementById('carGameBox').classList.remove('hidden');
+    currentCarLane = 1;
+    updateCarPosition();
+
+    for (let i = 0; i < 3; i++) {
+      document.getElementById(`gate${i}`).innerText = options[i] || '---';
+    }
+  }
+
+  function moveCar(dir) {
+    currentCarLane = Math.max(0, Math.min(2, currentCarLane + dir));
+    updateCarPosition();
+  }
+
+  function updateCarPosition() {
+    const car = document.getElementById('playerCar');
+    car.style.left = carPositionsLeft[currentCarLane];
+  }
+
+  function driveDriveAndCheck() {
+    const q = currentQuestions[currentQIndex];
+    const gateText = document.getElementById(`gate${currentCarLane}`).innerText;
+
+    let isCorrect = false;
+    if (q.opts) {
+      isCorrect = (gateText === q.a || (Array.isArray(q.a) && q.a.includes(gateText)));
+    } else if (Array.isArray(q.a)) {
+      isCorrect = q.a.some(ans => ans.toLowerCase() === gateText.toLowerCase());
+    }
+
+    processResult(isCorrect, q.rule, Array.isArray(q.a) ? q.a[0] : q.a);
+  }
+
+  function checkMcAnswer(selected, q) {
+    document.querySelectorAll('.btn-opt').forEach(b => b.disabled = true);
+    processResult(selected === q.a, q.rule, q.a);
+  }
+
+  function submitInputAnswer() {
+    const q = currentQuestions[currentQIndex];
+    const userVal = document.getElementById('userAnswerInput').value.trim().toLowerCase();
+    document.getElementById('userAnswerInput').disabled = true;
+
+    let isCorrect = false;
+    if (Array.isArray(q.a)) {
+      isCorrect = q.a.some(ans => ans.toLowerCase() === userVal || ans.toLowerCase().replace(/\s+/g, '') === userVal.replace(/\s+/g, ''));
+    } else {
+      isCorrect = (userVal === q.a.toLowerCase());
+    }
+
+    processResult(isCorrect, q.rule, Array.isArray(q.a) ? q.a[0] : q.a);
+  }
+
+  function processResult(isCorrect, rule, expectedAns) {
+    const feedbackPanel = document.getElementById('feedbackPanel');
+    feedbackPanel.style.display = 'block';
+
+    if (isCorrect) {
+      score += 30;
+      streak++;
+      feedbackPanel.className = 'feedback-panel success';
+      feedbackPanel.innerHTML = `🎉 <strong>Goed gereden! Dat is juist!</strong><br>${rule}`;
+    } else {
+      streak = 0;
+      hp--;
+      feedbackPanel.className = 'feedback-panel error';
+      feedbackPanel.innerHTML = `❌ <strong>Oeps, verkeerde baan!</strong> Het juiste antwoord was: <em>"${expectedAns}"</em>.<br>${rule}`;
+    }
+
+    updateStats();
+
+    if (hp <= 0) {
+      setTimeout(() => endLevel(false), 1500);
+    } else {
+      document.getElementById('nextBtn').classList.remove('hidden');
+    }
+  }
+
+  function nextQuestion() {
+    currentQIndex++;
+    if (currentQIndex < currentQuestions.length) {
+      loadQuestion();
+    } else {
+      endLevel(true);
+    }
+  }
+
+  function endLevel(victory) {
+    document.getElementById('screenGame').classList.add('hidden');
+    document.getElementById('screenResult').classList.remove('hidden');
+
+    const emoji = document.getElementById('resEmoji');
+    const title = document.getElementById('resTitle');
+    const body = document.getElementById('resBody');
+
+    if (victory) {
+      emoji.innerText = '🏆';
+      title.innerText = 'Finish Bereikt!';
+      body.innerText = `Geweldig gedaan! Je hebt dit level afgerond met ${score} punten!`;
+    } else {
+      emoji.innerText = '💀';
+      title.innerText = 'Crashed / Game Over';
+      body.innerText = 'Je levens waren op. Bekijk theorie Level 1 nog eens goed en probeer het opnieuw!';
+    }
+  }
+
+  function updateStats() {
+    document.getElementById('hpVal').innerText = '❤️'.repeat(Math.max(0, hp));
+    document.getElementById('streakVal').innerText = streak;
+    document.getElementById('scoreVal').innerText = score;
+  }
+
+  window.onload = initApp;
+</script>
+
+</body>
+</html>
