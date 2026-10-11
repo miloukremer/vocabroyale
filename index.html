@@ -7,19 +7,19 @@
   
   <style>
     :root {
-      --bg-dark: #0b0f19;
-      --card-bg: #151d30;
-      --card-inner: #1e293b;
-      --accent-purple: #8b5cf6;
-      --accent-blue: #3b82f6;
-      --accent-green: #10b981;
-      --accent-red: #ef4444;
-      --accent-gold: #f59e0b;
-      --accent-pink: #ec4899;
-      --accent-teal: #14b8a6;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #243049;
+      --bg-color: #f1f5f9;
+      --card-bg: #ffffff;
+      --card-inner: #f8fafc;
+      --accent-purple: #7c3aed;
+      --accent-blue: #2563eb;
+      --accent-green: #059669;
+      --accent-red: #dc2626;
+      --accent-gold: #b45309;
+      --accent-pink: #db2777;
+      --accent-teal: #0f766e;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #cbd5e1;
     }
 
     * {
@@ -30,7 +30,7 @@
 
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg-dark);
+      background-color: var(--bg-color);
       color: var(--text-main);
       display: flex;
       justify-content: center;
@@ -45,7 +45,7 @@
       padding: 24px;
       max-width: 960px;
       width: 100%;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
       border: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
@@ -56,7 +56,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--bg-dark);
+      background: var(--bg-color);
       padding: 12px 20px;
       border-radius: 14px;
       border: 1px solid var(--border-color);
@@ -110,17 +110,17 @@
     .item-card:hover {
       border-color: var(--accent-purple);
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(139, 92, 246, 0.25);
+      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.15);
     }
 
     .item-card.selected {
       border-color: var(--accent-green);
-      background: linear-gradient(135deg, #1e293b 0%, #064e3b 100%);
+      background: #ecfdf5;
     }
 
     .item-card.theory {
       border-color: var(--accent-gold);
-      background: linear-gradient(135deg, #1e293b 0%, #3f2d04 100%);
+      background: #fffbeb;
     }
 
     .item-title {
@@ -144,9 +144,9 @@
       height: 320px;
       border-radius: 16px;
       overflow: hidden;
-      border: 4px solid #334155;
-      background: #15803d;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+      border: 4px solid var(--border-color);
+      background: #4ade80;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
     }
 
     .road-asphalt {
@@ -194,16 +194,16 @@
     }
 
     .kart-gate {
-      background: rgba(15, 23, 42, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       border: 2px solid var(--accent-gold);
       border-radius: 12px;
       padding: 10px;
-      color: #fff;
+      color: var(--text-main);
       font-weight: 700;
       font-size: 0.95rem;
       text-align: center;
       width: 90%;
-      box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
+      box-shadow: 0 0 12px rgba(180, 83, 9, 0.2);
       z-index: 5;
     }
 
@@ -250,7 +250,7 @@
     .btn-steer {
       background: var(--card-inner);
       border: 2px solid var(--accent-blue);
-      color: #fff;
+      color: var(--accent-blue);
       padding: 14px 28px;
       border-radius: 12px;
       font-size: 1.1rem;
@@ -259,7 +259,7 @@
       transition: all 0.15s;
     }
 
-    .btn-steer:active { transform: scale(0.95); background: var(--accent-blue); }
+    .btn-steer:active { transform: scale(0.95); background: var(--accent-blue); color: #fff; }
 
     .btn-drive {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -274,10 +274,10 @@
       transition: all 0.2s;
     }
 
-    .btn-drive:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6); }
+    .btn-drive:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4); }
 
     .theory-box {
-      background: var(--bg-dark);
+      background: var(--bg-color);
       border-radius: 16px;
       padding: 20px;
       border: 1px solid var(--accent-gold);
@@ -290,10 +290,10 @@
     }
 
     .theory-box h3 { color: var(--accent-gold); font-size: 1.2rem; }
-    .example-tag { background: var(--card-inner); padding: 4px 10px; border-radius: 6px; font-family: monospace; color: #38bdf8; }
+    .example-tag { background: var(--card-inner); padding: 4px 10px; border-radius: 6px; font-family: monospace; color: var(--accent-blue); font-weight: 600; }
 
     .arena-box {
-      background: var(--bg-dark);
+      background: var(--bg-color);
       border-radius: 16px;
       padding: 20px;
       border: 1px solid var(--border-color);
@@ -329,15 +329,15 @@
       text-align: left;
     }
 
-    .btn-opt:hover { background: #334155; border-color: var(--accent-purple); }
+    .btn-opt:hover { background: var(--bg-color); border-color: var(--accent-purple); }
 
     .input-box {
       width: 100%;
       padding: 16px;
       border-radius: 12px;
       border: 2px solid var(--accent-blue);
-      background: var(--card-inner);
-      color: #fff;
+      background: var(--card-bg);
+      color: var(--text-main);
       font-size: 1.1rem;
       outline: none;
       transition: border-color 0.2s;
@@ -597,15 +597,15 @@
 
   const levelsDifficulty = [
     { id: 'lvl1', title: 'Level 1 — Theorie 📖', desc: 'Neem de regels eerst even rustig door.', isTheory: true },
-    { id: 'lvl2', title: 'Level 2 — Oefeningen 🟢', desc: 'Toepassen van de regels met losse zinnen.' }
+    { id: 'lvl2', title: 'Level 2 — Basis Oefeningen 🟢', desc: 'Toepassen van de regels met standaard zinnen.' },
+    { id: 'lvl3', title: 'Level 3 — Proefwerk & Expert 🔴', desc: 'Moeilijkere zinnen, vraagvormen en uitdagende uitzonderingen!' }
   ];
 
   /* 
    QUESTION BANK:
    Alle vragen zijn nu ontworpen om primair met tekst-invoer (fill_in) beantwoord te worden.
    q.a = Array van geaccepteerde strings.
-   q.opts = 3 opties voor Mario Kart / MC. De eerste (index 0) in q.opts hoeft niet exact q.a te zijn, 
-   maar het systeem matcht slim of toont de opties op het scherm.
+   q.opts = 3 opties voor Mario Kart / MC.
   */
   const questionBank = [
     // --- PRESENT SIMPLE ---
@@ -621,6 +621,14 @@
     { topic: 'present_simple', level: 'lvl2', 
       q: "We often ___ (go) to the cinema.", 
       a: ["go"], opts: ["go", "goes", "are going"], rule: "Bij 'We' gebruik je het hele werkwoord in de Present Simple." },
+    
+    // Present Simple - Level 3 (Expert)
+    { topic: 'present_simple', level: 'lvl3', 
+      q: "My parents ___ (not / like) loud music, but they love jazz.", 
+      a: ["don't like", "does not like", "do not like"], opts: ["don't like", "doesn't like", "aren't liking"], rule: "Meervoud (My parents) -> don't + hele werkwoord." },
+    { topic: 'present_simple', level: 'lvl3', 
+      q: "___ he usually ___ (walk) to school on Mondays?", 
+      a: ["does he usually walk", "does walk"], opts: ["Does ... walk", "Is ... walking", "Do ... walk"], rule: "Vraagsom bij he/she/it -> Does + subject + hele werkwoord." },
 
     // --- PRESENT CONTINUOUS ---
     { topic: 'present_continuous', level: 'lvl2', 
@@ -636,6 +644,14 @@
       q: "Listen! She ___ (sing) a beautiful song.", 
       a: ["is singing", "'s singing"], opts: ["is singing", "sings", "was singing"], rule: "Listen! -> Nu bezig -> is singing." },
 
+    // Present Continuous - Level 3 (Expert)
+    { topic: 'present_continuous', level: 'lvl3', 
+      q: "Why ___ you ___ (shout) at me right now?", 
+      a: ["are you shouting", "are shouting"], opts: ["are ... shouting", "do ... shout", "is ... shouting"], rule: "Vraagvorm nu bezig -> am/is/are + subject + werkwoord-ing." },
+    { topic: 'present_continuous', level: 'lvl3', 
+      q: "Listen! The children ___ (make) a lot of noise upstairs.", 
+      a: ["are making"], opts: ["are making", "is making", "make"], rule: "Listen! -> Continuous. 'make' verliest de -e bij +ing." },
+
     // --- PAST SIMPLE ---
     { topic: 'past_simple', level: 'lvl2', 
       q: "I ___ (visit) my grandmother yesterday.", 
@@ -646,7 +662,15 @@
     { topic: 'past_simple', level: 'lvl2', 
       q: "We ___ (not / eat) pizza two days ago.", 
       a: ["didn't eat", "did not eat"], opts: ["didn't eat", "don't eat", "weren't eating"], rule: "Ontkenning in verleden tijd = didn't + hele werkwoord." },
-    
+
+    // Past Simple - Level 3 (Expert)
+    { topic: 'past_simple', level: 'lvl3', 
+      q: "They ___ (buy) a new car last month.", 
+      a: ["bought"], opts: ["bought", "buyed", "were buying"], rule: "Onregelmatig werkwoord: buy -> bought." },
+    { topic: 'past_simple', level: 'lvl3', 
+      q: "___ you ___ (see) that famous film last night?", 
+      a: ["did you see", "did see"], opts: ["Did ... see", "Did ... saw", "Were ... seeing"], rule: "Vraagvorm verleden tijd -> Did + subject + hele werkwoord." },
+
     // --- PAST CONTINUOUS ---
     { topic: 'past_continuous', level: 'lvl2', 
       q: "I ___ (sleep) when the phone rang.", 
@@ -657,6 +681,14 @@
     { topic: 'past_continuous', level: 'lvl2', 
       q: "She ___ (read) a book all evening yesterday.", 
       a: ["was reading"], opts: ["was reading", "read", "were reading"], rule: "Duurde een periode in het verleden -> was reading." },
+
+    // Past Continuous - Level 3 (Expert)
+    { topic: 'past_continuous', level: 'lvl3', 
+      q: "While I ___ (cook) dinner, my brother broke a glass.", 
+      a: ["was cooking"], opts: ["was cooking", "cooked", "were cooking"], rule: "Achtergrondactie in het verleden (While ...) -> was/were + ing." },
+    { topic: 'past_continuous', level: 'lvl3', 
+      q: "What ___ you ___ (do) at 8 PM yesterday evening?", 
+      a: ["were you doing", "were doing"], opts: ["were ... doing", "was ... doing", "did ... do"], rule: "Precies op dat moment in het verleden bezig -> were you doing." },
 
     // --- FUTURE TENSES ---
     { topic: 'future_tenses', level: 'lvl2', 
@@ -669,13 +701,29 @@
       q: "I ___ (meet) my dentist tomorrow at 3 PM.", 
       a: ["am meeting", "'m meeting"], opts: ["am meeting", "will meet", "meet"], rule: "Vaste, geplande afspraak in de agenda -> Present Continuous (am meeting)." },
 
+    // Future Tenses - Level 3 (Expert)
+    { topic: 'future_tenses', level: 'lvl3', 
+      q: "Watch out! You ___ (drop) those heavy plates!", 
+      a: ["are going to drop", "'re going to drop"], opts: ["are going to drop", "will drop", "drop"], rule: "Direct zichtbaar gevaar / bewijs nu -> are going to." },
+    { topic: 'future_tenses', level: 'lvl3', 
+      q: "I promise I ___ (help) you with your homework tonight.", 
+      a: ["will help", "'ll help"], opts: ["will help", "am going to help", "am helping"], rule: "Een belofte maken (promise) -> will + hele werkwoord." },
+
     // --- PRESENT PERFECT ---
     { topic: 'present_perfect', level: 'lvl2', 
       q: "I ___ never ___ (be) to Spain.", 
       a: ["have been", "'ve been"], opts: ["have been", "has been", "was"], rule: "Ervaring (never) -> Present Perfect (have/has + 3e rij)." },
     { topic: 'present_perfect', level: 'lvl2', 
       q: "She ___ already ___ (finish) her homework.", 
-      a: ["has finished", "'s finished"], opts: ["has finished", "have finished", "finished"], rule: "Already -> Resultaat in het heden -> has finished." }
+      a: ["has finished", "'s finished"], opts: ["has finished", "have finished", "finished"], rule: "Already -> Resultaat in het heden -> has finished." },
+
+    // Present Perfect - Level 3 (Expert)
+    { topic: 'present_perfect', level: 'lvl3', 
+      q: "We ___ (live) in this city for five years now.", 
+      a: ["have lived", "'ve lived"], opts: ["have lived", "has lived", "lived"], rule: "Duurt van verleden tot nu (for 5 years) -> Present Perfect." },
+    { topic: 'present_perfect', level: 'lvl3', 
+      q: "___ you ever ___ (eat) Japanese sushi?", 
+      a: ["have you ever eaten", "have eaten", "have you eaten"], opts: ["Have ... eaten", "Did ... eat", "Has ... eaten"], rule: "Vraag naar levenservaring -> Have + subject + 3e rij (eaten)." }
   ];
 
   // App State
@@ -833,9 +881,16 @@
     document.getElementById('screenTheory').classList.add('hidden');
     document.getElementById('screenGame').classList.remove('hidden');
 
-    // Filter vragen op basis van geselecteerde onderwerpen
-    currentQuestions = questionBank.filter(q => selectedTopicIds.includes(q.topic));
-    
+    // Filter vragen op basis van geselecteerde onderwerpen én gekozen level
+    currentQuestions = questionBank.filter(q => 
+      selectedTopicIds.includes(q.topic) && (q.level === activeLevel.id || !q.level)
+    );
+
+    // Fallback: Als er voor een specifieke combinatie geen lvl3 vragen zijn, gebruik alle vragen van de onderwerpen
+    if (currentQuestions.length === 0) {
+      currentQuestions = questionBank.filter(q => selectedTopicIds.includes(q.topic));
+    }
+
     // Shuffle de array
     currentQuestions.sort(() => Math.random() - 0.5);
 
@@ -906,7 +961,7 @@
     for (let i = 0; i < 3; i++) {
       const gate = document.getElementById(`gate${i}`);
       gate.innerText = displayOpts[i] || '---';
-      gate.style.backgroundColor = 'rgba(15, 23, 42, 0.9)'; // Reset de poortkleur
+      gate.style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; // Reset de poortkleur
     }
   }
 
