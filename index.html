@@ -1,1127 +1,310 @@
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grammar Kart Quest - Ultimate Edition</title>
-  
-  <style>
-    :root {
-      --bg-color: #f1f5f9;
-      --card-bg: #ffffff;
-      --card-inner: #f8fafc;
-      --accent-purple: #7c3aed;
-      --accent-blue: #2563eb;
-      --accent-green: #059669;
-      --accent-red: #dc2626;
-      --accent-gold: #b45309;
-      --accent-pink: #db2777;
-      --accent-teal: #0f766e;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #cbd5e1;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 15px;
-    }
-
-    .game-card {
-      background-color: var(--card-bg);
-      border-radius: 20px;
-      padding: 24px;
-      max-width: 960px;
-      width: 100%;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-      border: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--bg-color);
-      padding: 12px 20px;
-      border-radius: 14px;
-      border: 1px solid var(--border-color);
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-      color: var(--accent-blue);
-      font-weight: 600;
-    }
-
-    .breadcrumb span {
-      color: var(--text-muted);
-    }
-
-    .stat-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 700;
-      font-size: 0.95rem;
-    }
-
-    .selection-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 14px;
-      max-height: 550px;
-      overflow-y: auto;
-      padding-right: 5px;
-    }
-
-    .item-card {
-      background: var(--card-inner);
-      border: 2px solid var(--border-color);
-      border-radius: 14px;
-      padding: 18px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      position: relative;
-    }
-
-    .item-card:hover {
-      border-color: var(--accent-purple);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.15);
-    }
-
-    .item-card.selected {
-      border-color: var(--accent-green);
-      background: #ecfdf5;
-    }
-
-    .item-card.theory {
-      border-color: var(--accent-gold);
-      background: #fffbeb;
-    }
-
-    .item-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .item-desc {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      line-height: 1.35;
-    }
-
-    .mario-road-wrapper {
-      position: relative;
-      width: 100%;
-      height: 320px;
-      border-radius: 16px;
-      overflow: hidden;
-      border: 4px solid var(--border-color);
-      background: #4ade80;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
-    }
-
-    .road-asphalt {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 15%;
-      right: 15%;
-      background-color: #262626;
-      border-left: 6px solid #f59e0b;
-      border-right: 6px solid #f59e0b;
-      display: flex;
-    }
-
-    .road-asphalt.driving {
-      background-image: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 30px,
-        rgba(255, 255, 255, 0.2) 30px,
-        rgba(255, 255, 255, 0.2) 60px
-      );
-      animation: roadScroll 0.4s linear infinite;
-    }
-
-    @keyframes roadScroll {
-      0% { background-position-y: 0px; }
-      100% { background-position-y: 60px; }
-    }
-
-    .lane-divider {
-      flex: 1;
-      border-right: 4px dashed rgba(255, 255, 255, 0.6);
-      height: 100%;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding-top: 15px;
-    }
-
-    .lane-divider:last-child {
-      border-right: none;
-    }
-
-    .kart-gate {
-      background: rgba(255, 255, 255, 0.95);
-      border: 2px solid var(--accent-gold);
-      border-radius: 12px;
-      padding: 10px;
-      color: var(--text-main);
-      font-weight: 700;
-      font-size: 0.95rem;
-      text-align: center;
-      width: 90%;
-      box-shadow: 0 0 12px rgba(180, 83, 9, 0.2);
-      z-index: 5;
-    }
-
-    .mario-car {
-      position: absolute;
-      bottom: 20px;
-      width: 54px;
-      height: 70px;
-      background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
-      border-radius: 14px 14px 8px 8px;
-      border: 2px solid #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding: 4px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(239, 68, 68, 0.8);
-      transition: left 0.22s cubic-bezier(0.2, 0.8, 0.25, 1), bottom 0.5s ease-in, transform 0.5s ease-in, opacity 0.4s 0.1s ease-in;
-      z-index: 10;
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    .mario-car.drive-forward {
-      bottom: 250px; /* Rijdt omhoog richting het poortje */
-      transform: scale(0.3); /* Wordt kleiner in de verte */
-      opacity: 0; /* Verdwijnt als hij door de poort is */
-    }
-
-    .car-spoiler { width: 110%; height: 8px; background: #111; border-radius: 3px; }
-    .car-windshield { width: 80%; height: 18px; background: #38bdf8; border-radius: 4px; border: 1px solid #fff; }
-    .car-wheels { display: flex; justify-content: space-between; width: 120%; }
-    .wheel { width: 8px; height: 16px; background: #000; border-radius: 2px; }
-
-    .controls-row {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      align-items: center;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .btn-steer {
-      background: var(--card-inner);
-      border: 2px solid var(--accent-blue);
-      color: var(--accent-blue);
-      padding: 14px 28px;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.15s;
-    }
-
-    .btn-steer:active { transform: scale(0.95); background: var(--accent-blue); color: #fff; }
-
-    .btn-drive {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: #fff;
-      border: none;
-      padding: 14px 28px;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-      transition: all 0.2s;
-    }
-
-    .btn-drive:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4); }
-
-    .theory-box {
-      background: var(--bg-color);
-      border-radius: 16px;
-      padding: 20px;
-      border: 1px solid var(--accent-gold);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      line-height: 1.5;
-      max-height: 380px;
-      overflow-y: auto;
-    }
-
-    .theory-box h3 { color: var(--accent-gold); font-size: 1.2rem; }
-    .example-tag { background: var(--card-inner); padding: 4px 10px; border-radius: 6px; font-family: monospace; color: var(--accent-blue); font-weight: 600; }
-
-    .arena-box {
-      background: var(--bg-color);
-      border-radius: 16px;
-      padding: 20px;
-      border: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .question-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-      color: var(--accent-gold);
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-
-    .question-text { font-size: 1.3rem; font-weight: 700; line-height: 1.4; }
-
-    .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-
-    .btn-opt {
-      background: var(--card-inner);
-      border: 2px solid var(--border-color);
-      color: var(--text-main);
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-align: left;
-    }
-
-    .btn-opt:hover { background: var(--bg-color); border-color: var(--accent-purple); }
-
-    .input-box {
-      width: 100%;
-      padding: 16px;
-      border-radius: 12px;
-      border: 2px solid var(--accent-blue);
-      background: var(--card-bg);
-      color: var(--text-main);
-      font-size: 1.1rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    
-    .input-box:focus {
-      border-color: var(--accent-teal);
-      box-shadow: 0 0 10px rgba(20, 184, 166, 0.3);
-    }
-
-    .feedback-panel {
-      padding: 14px 18px;
-      border-radius: 12px;
-      font-size: 1rem;
-      line-height: 1.5;
-      display: none;
-    }
-
-    .feedback-panel.success { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--accent-green); color: var(--accent-green); }
-    .feedback-panel.error { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--accent-red); color: var(--accent-red); }
-
-    .btn-action {
-      background: var(--accent-purple);
-      color: #fff;
-      border: none;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.2s ease;
-    }
-
-    .btn-action:hover { background: #7c3aed; }
-    .btn-back { background: none; border: none; color: var(--accent-blue); font-weight: 700; cursor: pointer; font-size: 0.9rem; }
-    .hidden { display: none !important; }
-  </style>
-</head>
-<body>
-
-<div class="game-card">
-
-  <!-- Top Bar -->
-  <div class="top-bar">
-    <div class="breadcrumb" id="breadcrumbPath">
-      <span>Onderwerpen</span>
-    </div>
-    <div style="display: flex; gap: 15px;">
-      <div class="stat-item">❤️ <span id="hpVal">❤️❤️❤️</span></div>
-      <div class="stat-item">⚡ <span id="streakVal">0</span></div>
-      <div class="stat-item">⭐ <span id="scoreVal">0</span></div>
-    </div>
-  </div>
-
-  <!-- STAP 1: ONDERWERPEN SELECTEREN -->
-  <div id="screenTopics">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 10px;">
-      <h2>Kies Grammatica Onderwerpen 📚</h2>
-      <button class="btn-action" style="width: auto; padding: 10px 20px;" onclick="confirmMultiTopics()">
-        Start Selectie 🚀
-      </button>
-    </div>
-    <p style="color: var(--text-muted); margin-bottom: 16px; font-size: 0.9rem;">
-      Selecteer de werkwoordstijden die je wilt oefenen. Zorg dat je 'Invullen' kiest als je goed wilt trainen!
-    </p>
-    <div class="selection-grid" id="topicsGrid"></div>
-  </div>
-
-  <!-- STAP 2: SPELTYPE SELECTEREN -->
-  <div id="screenGames" class="hidden">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h2>Kies een Speltype 🎮</h2>
-      <button class="btn-back" onclick="goToStep('topics')">← Terug</button>
-    </div>
-    <div class="selection-grid" id="gamesGrid"></div>
-  </div>
-
-  <!-- STAP 3: LEVEL SELECTEREN -->
-  <div id="screenLevels" class="hidden">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h2>Kies een Niveau / Level 🎯</h2>
-      <button class="btn-back" onclick="goToStep('games')">← Terug</button>
-    </div>
-    <div class="selection-grid" id="levelsGrid"></div>
-  </div>
-
-  <!-- LEVEL 1: THEORIE & UITLEG -->
-  <div id="screenTheory" class="hidden">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h2 id="theoryTopicTitle">Level 1 — Uitleg & Theorie 📖</h2>
-      <button class="btn-back" onclick="goToStep('levels')">← Terug</button>
-    </div>
-
-    <div class="theory-box" id="theoryContent"></div>
-
-    <button class="btn-action" style="margin-top: 15px;" onclick="startNextLevelFromTheory()">
-      Ik snap het! Naar de Oefeningen →
-    </button>
-  </div>
-
-  <!-- GAME ARENA -->
-  <div id="screenGame" class="hidden">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <span style="font-size: 0.85rem; color: var(--text-muted);" id="qProgress">Vraag 1/10</span>
-      <button class="btn-back" onclick="goToStep('levels')">← Stop</button>
-    </div>
-
-    <div class="arena-box">
-      <div class="question-header">
-        <span id="qCategory">CATEGORY</span>
-        <span id="qModeBadge" style="color: var(--accent-teal);">GAME MODE</span>
-      </div>
-      <div class="question-text" id="qText">Question...</div>
-
-      <!-- MARIO KART HIGHWAY RACER -->
-      <div id="carGameBox" class="hidden">
-        <div class="mario-road-wrapper">
-          <div class="road-asphalt driving" id="roadElement">
-            <div class="lane-divider" id="lane0"><div class="kart-gate" id="gate0">A</div></div>
-            <div class="lane-divider" id="lane1"><div class="kart-gate" id="gate1">B</div></div>
-            <div class="lane-divider" id="lane2"><div class="kart-gate" id="gate2">C</div></div>
-          </div>
-          <div class="mario-car" id="playerCar" style="left: 45%;">
-            <div class="car-spoiler"></div>
-            <div class="car-windshield"></div>
-            <div class="car-wheels">
-              <div class="wheel"></div>
-              <div class="wheel"></div>
-            </div>
-          </div>
-        </div>
-        <div class="controls-row">
-          <button class="btn-steer" onclick="moveCar(-1)">⬅️ Links</button>
-          <button class="btn-drive" onclick="driveDriveAndCheck()">Rijd er doorheen! 🚗💨</button>
-          <button class="btn-steer" onclick="moveCar(1)">Rechts ➡️</button>
-        </div>
-      </div>
-
-      <!-- MULTIPLE CHOICE SPEED RUN -->
-      <div class="options-grid hidden" id="mcBox"></div>
-
-      <!-- FILL IN THE BLANK / GRAMMAR DETECTIVE -->
-      <div id="inputBoxContainer" class="hidden" style="display: flex; flex-direction: column; gap: 12px;">
-        <p style="font-size: 0.9rem; color: var(--text-muted);">Typ het correcte woord of de woorden. Druk op Enter of klik op controleer.</p>
-        <input type="text" class="input-box" id="userAnswerInput" placeholder="Bijv: 'is playing' of 'plays'" autocomplete="off">
-        <button class="btn-action" style="background-color: var(--accent-teal);" onclick="submitInputAnswer()">Controleer Antwoord ✓</button>
-      </div>
-    </div>
-
-    <div class="feedback-panel" id="feedbackPanel"></div>
-    <button class="btn-action hidden" id="nextBtn" onclick="nextQuestion()">Volgende Vraag →</button>
-  </div>
-
-  <!-- RESULT SCREEN -->
-  <div id="screenResult" class="hidden" style="text-align: center; padding: 30px 0;">
-    <span style="font-size: 4rem;" id="resEmoji">🏆</span>
-    <h2 style="font-size: 2rem; margin: 10px 0;" id="resTitle">Gefeliciteerd!</h2>
-    <p style="color: var(--text-muted); margin-bottom: 20px;" id="resBody"></p>
-    <button class="btn-action" onclick="goToStep('topics')">Terug naar Onderwerpen</button>
-  </div>
-
-</div>
-
-<script>
-  // ONDERWERPEN DATABASE (Uitgebreid met nieuwe Tenses)
-  const topicsData = [
-    {
-      id: 'present_simple',
-      title: 'Present Simple',
-      desc: 'Feiten & Gewoontes (He/She/It +s)',
-      icon: '⏰',
-      theory: `
-        <h3>Present Simple (Tegenwoordige Tijd)</h3>
-        <p>Gebruik de Present Simple voor feiten, gewoontes en dingen die regelmatig gebeuren.</p>
-        <p><strong>Regel:</strong> Bij <em>he, she, it</em> komt er een <strong>-s</strong> (of -es) achter het werkwoord (Shit-rule).</p>
-        <p><strong>Signaalwoorden:</strong> always, usually, often, sometimes, never, every day.</p>
-        <p><strong>Voorbeelden:</strong><br>
-        - I <span class="example-tag">play</span> tennis every Sunday.<br>
-        - She <span class="example-tag">watches</span> TV in the evening.<br>
-        - We <span class="example-tag">don't go</span> to school on weekends.</p>
-      `
-    },
-    {
-      id: 'present_continuous',
-      title: 'Present Continuous',
-      desc: 'Bezig zijn (am/is/are + ing)',
-      icon: '🏃',
-      theory: `
-        <h3>Present Continuous</h3>
-        <p>Gebruik deze tijd voor dingen die <strong>NU</strong>, op dit moment aan de gang zijn.</p>
-        <p><strong>Formule:</strong> <code>am / is / are + werkwoord + ing</code></p>
-        <p><strong>Signaalwoorden:</strong> now, at the moment, look!, listen!</p>
-        <p><strong>Voorbeelden:</strong><br>
-        - Look! The dog <span class="example-tag">is running</span> in the park.<br>
-        - I <span class="example-tag">am studying</span> right now.</p>
-      `
-    },
-    {
-      id: 'past_simple',
-      title: 'Past Simple',
-      desc: 'Verleden tijd (-ed of 2e rij)',
-      icon: '📜',
-      theory: `
-        <h3>Past Simple (Verleden Tijd)</h3>
-        <p>De Past Simple gebruik je voor iets dat in het verleden is gebeurd en helemaal afgelopen is.</p>
-        <p><strong>Regelmatig (+ed):</strong> play → played | watch → watched</p>
-        <p><strong>Onregelmatig:</strong> go → went | see → saw | have → had</p>
-        <p><strong>Signaalwoorden:</strong> yesterday, last week, two days ago, in 2023.</p>
-      `
-    },
-    {
-      id: 'past_continuous',
-      title: 'Past Continuous',
-      desc: 'Was/were + ing (Achtergrond/Onderbroken)',
-      icon: '🕰️',
-      theory: `
-        <h3>Past Continuous</h3>
-        <p>Gebruik deze tijd voor een actie die een tijdje duurde in het verleden. Vaak gebruikt als "achtergrond", of wanneer de actie werd <em>onderbroken</em> door een korte actie (Past Simple).</p>
-        <p><strong>Formule:</strong> <code>was / were + werkwoord + ing</code></p>
-        <p><strong>Voorbeelden:</strong><br>
-        - I <span class="example-tag">was sleeping</span> when the phone rang.<br>
-        - They <span class="example-tag">were playing</span> games all evening.</p>
-      `
-    },
-    {
-      id: 'future_tenses',
-      title: 'Future Tenses',
-      desc: 'Will / Going to / Present Cont.',
-      icon: '🚀',
-      theory: `
-        <h3>Future (Toekomst)</h3>
-        <p><strong>Will + hele werkwoord:</strong> Spontane beslissing of voorspelling zonder bewijs. <br><em>"I think it will rain."</em></p>
-        <p><strong>To be going to + hele werkwoord:</strong> Een plan of voorspelling met bewijs. <br><em>"Look at the clouds, it is going to rain."</em></p>
-        <p><strong>Present Continuous:</strong> Een harde, in de agenda vastgelegde afspraak in de toekomst. <br><em>"I am seeing the dentist tomorrow at 3 PM."</em></p>
-      `
-    },
-    {
-      id: 'present_perfect',
-      title: 'Present Perfect',
-      desc: 'have/has + voltooid deelwoord',
-      icon: '✨',
-      theory: `
-        <h3>Present Perfect</h3>
-        <p>Gebruik je voor een ervaring in je leven of iets uit het verleden met resultaat in het HEDEN.</p>
-        <p><strong>Formule:</strong> <code>have / has + past participle (3e rij / -ed)</code></p>
-        <p><strong>Signaalwoorden:</strong> ever, never, already, just, yet, since, for.</p>
-      `
-    }
-  ];
-
-  const gameTypesData = [
-    { id: 'fill_in', title: 'Invullen & Typen (Aanbevolen) ⌨️', desc: 'Typ zelf het juiste antwoord in. Zeer accuraat en streng! Negeert hoofdletters en spaties.' },
-    { id: 'car_highway', title: 'Mario Kart Racer 🏎️💨', desc: 'Kies het juiste antwoord door naar de correcte rijbaan te sturen.' },
-    { id: 'speed_run', title: 'Multiple Choice Run ⚡', desc: 'Snelle klikvragen. Goed om de theorie in je hoofd te stampen.' }
-  ];
-
-  const levelsDifficulty = [
-    { id: 'lvl1', title: 'Level 1 — Theorie 📖', desc: 'Neem de regels eerst even rustig door.', isTheory: true },
-    { id: 'lvl2', title: 'Level 2 — Basis Oefeningen 🟢', desc: 'Toepassen van de regels met standaard zinnen.' },
-    { id: 'lvl3', title: 'Level 3 — Proefwerk & Expert 🔴', desc: 'Moeilijkere zinnen, vraagvormen en uitdagende uitzonderingen!' }
-  ];
-
-  /* 
-   QUESTION BANK:
-   Alle vragen zijn nu ontworpen om primair met tekst-invoer (fill_in) beantwoord te worden.
-   q.a = Array van geaccepteerde strings.
-   q.opts = 3 opties voor Mario Kart / MC.
-  */
-  const questionBank = [
-    // --- PRESENT SIMPLE ---
-    { topic: 'present_simple', level: 'lvl2', 
-      q: "He never ___ (listen) to his teacher.", 
-      a: ["listens"], opts: ["listens", "listen", "is listening"], rule: "He/she/it krijgt een -s in de Present Simple." },
-    { topic: 'present_simple', level: 'lvl2', 
-      q: "I always ___ (brush) my teeth in the morning.", 
-      a: ["brush"], opts: ["brush", "brushes", "am brushing"], rule: "Bij 'I' gebruik je het hele werkwoord." },
-    { topic: 'present_simple', level: 'lvl2', 
-      q: "She ___ (not / play) football on Sundays.", 
-      a: ["doesn't play", "does not play"], opts: ["doesn't play", "don't play", "isn't playing"], rule: "Ontkenning bij she is 'doesn't' + hele werkwoord." },
-    { topic: 'present_simple', level: 'lvl2', 
-      q: "We often ___ (go) to the cinema.", 
-      a: ["go"], opts: ["go", "goes", "are going"], rule: "Bij 'We' gebruik je het hele werkwoord in de Present Simple." },
-    
-    // Present Simple - Level 3 (Expert)
-    { topic: 'present_simple', level: 'lvl3', 
-      q: "My parents ___ (not / like) loud music, but they love jazz.", 
-      a: ["don't like", "does not like", "do not like"], opts: ["don't like", "doesn't like", "aren't liking"], rule: "Meervoud (My parents) -> don't + hele werkwoord." },
-    { topic: 'present_simple', level: 'lvl3', 
-      q: "___ he usually ___ (walk) to school on Mondays?", 
-      a: ["does he usually walk", "does walk"], opts: ["Does ... walk", "Is ... walking", "Do ... walk"], rule: "Vraagsom bij he/she/it -> Does + subject + hele werkwoord." },
-
-    // --- PRESENT CONTINUOUS ---
-    { topic: 'present_continuous', level: 'lvl2', 
-      q: "Look! The cat ___ (sleep) on the sofa.", 
-      a: ["is sleeping", "'s sleeping"], opts: ["is sleeping", "sleeps", "are sleeping"], rule: "Signaalwoord 'Look!' -> Nu aan de gang -> is + sleeping." },
-    { topic: 'present_continuous', level: 'lvl2', 
-      q: "I ___ (study) for my English test right now.", 
-      a: ["am studying", "'m studying"], opts: ["am studying", "study", "is studying"], rule: "Right now -> Nu bezig -> am studying." },
-    { topic: 'present_continuous', level: 'lvl2', 
-      q: "They ___ (not / watch) TV at the moment.", 
-      a: ["are not watching", "aren't watching", "'re not watching"], opts: ["aren't watching", "don't watch", "isn't watching"], rule: "At the moment -> Nu bezig -> are not watching." },
-    { topic: 'present_continuous', level: 'lvl2', 
-      q: "Listen! She ___ (sing) a beautiful song.", 
-      a: ["is singing", "'s singing"], opts: ["is singing", "sings", "was singing"], rule: "Listen! -> Nu bezig -> is singing." },
-
-    // Present Continuous - Level 3 (Expert)
-    { topic: 'present_continuous', level: 'lvl3', 
-      q: "Why ___ you ___ (shout) at me right now?", 
-      a: ["are you shouting", "are shouting"], opts: ["are ... shouting", "do ... shout", "is ... shouting"], rule: "Vraagvorm nu bezig -> am/is/are + subject + werkwoord-ing." },
-    { topic: 'present_continuous', level: 'lvl3', 
-      q: "Listen! The children ___ (make) a lot of noise upstairs.", 
-      a: ["are making"], opts: ["are making", "is making", "make"], rule: "Listen! -> Continuous. 'make' verliest de -e bij +ing." },
-
-    // --- PAST SIMPLE ---
-    { topic: 'past_simple', level: 'lvl2', 
-      q: "I ___ (visit) my grandmother yesterday.", 
-      a: ["visited"], opts: ["visited", "visit", "have visited"], rule: "Yesterday -> Past Simple (regelmatig +ed)." },
-    { topic: 'past_simple', level: 'lvl2', 
-      q: "He ___ (go) to London last summer.", 
-      a: ["went"], opts: ["went", "goed", "goes"], rule: "Onregelmatig werkwoord: go -> went." },
-    { topic: 'past_simple', level: 'lvl2', 
-      q: "We ___ (not / eat) pizza two days ago.", 
-      a: ["didn't eat", "did not eat"], opts: ["didn't eat", "don't eat", "weren't eating"], rule: "Ontkenning in verleden tijd = didn't + hele werkwoord." },
-
-    // Past Simple - Level 3 (Expert)
-    { topic: 'past_simple', level: 'lvl3', 
-      q: "They ___ (buy) a new car last month.", 
-      a: ["bought"], opts: ["bought", "buyed", "were buying"], rule: "Onregelmatig werkwoord: buy -> bought." },
-    { topic: 'past_simple', level: 'lvl3', 
-      q: "___ you ___ (see) that famous film last night?", 
-      a: ["did you see", "did see"], opts: ["Did ... see", "Did ... saw", "Were ... seeing"], rule: "Vraagvorm verleden tijd -> Did + subject + hele werkwoord." },
-
-    // --- PAST CONTINUOUS ---
-    { topic: 'past_continuous', level: 'lvl2', 
-      q: "I ___ (sleep) when the phone rang.", 
-      a: ["was sleeping"], opts: ["was sleeping", "slept", "am sleeping"], rule: "Actie die op de achtergrond bezig was (was/were + ing)." },
-    { topic: 'past_continuous', level: 'lvl2', 
-      q: "They ___ (play) football when it started to rain.", 
-      a: ["were playing"], opts: ["were playing", "played", "was playing"], rule: "Actie die bezig was (were playing) en onderbroken werd." },
-    { topic: 'past_continuous', level: 'lvl2', 
-      q: "She ___ (read) a book all evening yesterday.", 
-      a: ["was reading"], opts: ["was reading", "read", "were reading"], rule: "Duurde een periode in het verleden -> was reading." },
-
-    // Past Continuous - Level 3 (Expert)
-    { topic: 'past_continuous', level: 'lvl3', 
-      q: "While I ___ (cook) dinner, my brother broke a glass.", 
-      a: ["was cooking"], opts: ["was cooking", "cooked", "were cooking"], rule: "Achtergrondactie in het verleden (While ...) -> was/were + ing." },
-    { topic: 'past_continuous', level: 'lvl3', 
-      q: "What ___ you ___ (do) at 8 PM yesterday evening?", 
-      a: ["were you doing", "were doing"], opts: ["were ... doing", "was ... doing", "did ... do"], rule: "Precies op dat moment in het verleden bezig -> were you doing." },
-
-    // --- FUTURE TENSES ---
-    { topic: 'future_tenses', level: 'lvl2', 
-      q: "Look at those dark clouds! It ___ (rain).", 
-      a: ["is going to rain", "'s going to rain"], opts: ["is going to rain", "will rain", "rains"], rule: "Voorspelling met bewijs (donkere wolken) -> is going to." },
-    { topic: 'future_tenses', level: 'lvl2', 
-      q: "I think people ___ (live) on Mars in 2050.", 
-      a: ["will live", "'ll live"], opts: ["will live", "are going to live", "are living"], rule: "Voorspelling / mening (I think) zonder hard bewijs -> will." },
-    { topic: 'future_tenses', level: 'lvl2', 
-      q: "I ___ (meet) my dentist tomorrow at 3 PM.", 
-      a: ["am meeting", "'m meeting"], opts: ["am meeting", "will meet", "meet"], rule: "Vaste, geplande afspraak in de agenda -> Present Continuous (am meeting)." },
-
-    // Future Tenses - Level 3 (Expert)
-    { topic: 'future_tenses', level: 'lvl3', 
-      q: "Watch out! You ___ (drop) those heavy plates!", 
-      a: ["are going to drop", "'re going to drop"], opts: ["are going to drop", "will drop", "drop"], rule: "Direct zichtbaar gevaar / bewijs nu -> are going to." },
-    { topic: 'future_tenses', level: 'lvl3', 
-      q: "I promise I ___ (help) you with your homework tonight.", 
-      a: ["will help", "'ll help"], opts: ["will help", "am going to help", "am helping"], rule: "Een belofte maken (promise) -> will + hele werkwoord." },
-
-    // --- PRESENT PERFECT ---
-    { topic: 'present_perfect', level: 'lvl2', 
-      q: "I ___ never ___ (be) to Spain.", 
-      a: ["have been", "'ve been"], opts: ["have been", "has been", "was"], rule: "Ervaring (never) -> Present Perfect (have/has + 3e rij)." },
-    { topic: 'present_perfect', level: 'lvl2', 
-      q: "She ___ already ___ (finish) her homework.", 
-      a: ["has finished", "'s finished"], opts: ["has finished", "have finished", "finished"], rule: "Already -> Resultaat in het heden -> has finished." },
-
-    // Present Perfect - Level 3 (Expert)
-    { topic: 'present_perfect', level: 'lvl3', 
-      q: "We ___ (live) in this city for five years now.", 
-      a: ["have lived", "'ve lived"], opts: ["have lived", "has lived", "lived"], rule: "Duurt van verleden tot nu (for 5 years) -> Present Perfect." },
-    { topic: 'present_perfect', level: 'lvl3', 
-      q: "___ you ever ___ (eat) Japanese sushi?", 
-      a: ["have you ever eaten", "have eaten", "have you eaten"], opts: ["Have ... eaten", "Did ... eat", "Has ... eaten"], rule: "Vraag naar levenservaring -> Have + subject + 3e rij (eaten)." }
-  ];
-
-  // App State
-  let selectedTopicIds = ['present_simple'];
-  let activeGameMode = null;
-  let activeLevel = null;
-  let currentQuestions = [];
-  let currentQIndex = 0;
-  let score = 0;
-  let streak = 0;
-  let hp = 3;
-
-  let currentCarLane = 1; 
-  const carPositionsLeft = ['22%', '45%', '68%'];
-
-  function initApp() {
-    renderTopics();
-    updateStats();
-
-    // Toetsenbord listeners
-    document.addEventListener('keydown', (e) => {
-      // Mario Kart Besturing
-      if (activeGameMode && activeGameMode.id === 'car_highway' && !document.getElementById('screenGame').classList.contains('hidden')) {
-        const driveBtn = document.querySelector('.btn-drive');
-        if (driveBtn && driveBtn.disabled) return; // Negeer input tijdens de rij-animatie
-
-        if (e.key === 'ArrowLeft' || e.key === 'a') moveCar(-1);
-        if (e.key === 'ArrowRight' || e.key === 'd') moveCar(1);
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          driveDriveAndCheck();
-        }
-      }
-    });
-
-    // Enter toets voor invulvak
-    document.getElementById('userAnswerInput').addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault(); // Voorkom default form submit
-        if (!document.getElementById('nextBtn').classList.contains('hidden')) {
-          nextQuestion();
-        } else if (!this.disabled) {
-          submitInputAnswer();
-        }
-      }
-    });
-  }
-
-  function goToStep(step) {
-    ['screenTopics', 'screenGames', 'screenLevels', 'screenTheory', 'screenGame', 'screenResult'].forEach(id => {
-      document.getElementById(id).classList.add('hidden');
-    });
-
-    const path = document.getElementById('breadcrumbPath');
-
-    if (step === 'topics') {
-      document.getElementById('screenTopics').classList.remove('hidden');
-      path.innerHTML = '<span>Onderwerpen</span>';
-    } else if (step === 'games') {
-      if(selectedTopicIds.length === 0) {
-        alert("Kies tenminste 1 onderwerp!");
-        return goToStep('topics');
-      }
-      document.getElementById('screenGames').classList.remove('hidden');
-      path.innerHTML = `<span style="cursor:pointer" onclick="goToStep('topics')">Onderwerpen</span> > <span>Geselecteerd (${selectedTopicIds.length})</span>`;
-      renderGameTypes();
-    } else if (step === 'levels') {
-      document.getElementById('screenLevels').classList.remove('hidden');
-      path.innerHTML = `<span style="cursor:pointer" onclick="goToStep('games')">Speltypes</span> > <span>${activeGameMode.title}</span>`;
-      renderLevels();
-    }
-  }
-
-  function renderTopics() {
-    const grid = document.getElementById('topicsGrid');
-    grid.innerHTML = '';
-    topicsData.forEach(t => {
-      const isSelected = selectedTopicIds.includes(t.id);
-      const card = document.createElement('div');
-      card.className = `item-card ${isSelected ? 'selected' : ''}`;
-      card.onclick = () => toggleTopicSelection(t.id);
-      card.innerHTML = `
-        <div class="item-title">${t.icon} ${t.title} ${isSelected ? '✅' : ''}</div>
-        <div class="item-desc">${t.desc}</div>
-      `;
-      grid.appendChild(card);
-    });
-  }
-
-  function toggleTopicSelection(id) {
-    if (selectedTopicIds.includes(id)) {
-      selectedTopicIds = selectedTopicIds.filter(item => item !== id);
-    } else {
-      selectedTopicIds.push(id);
-    }
-    renderTopics();
-  }
-
-  function confirmMultiTopics() { goToStep('games'); }
-
-  function renderGameTypes() {
-    const grid = document.getElementById('gamesGrid');
-    grid.innerHTML = '';
-    gameTypesData.forEach(g => {
-      const card = document.createElement('div');
-      card.className = 'item-card';
-      card.onclick = () => { activeGameMode = g; goToStep('levels'); };
-      card.innerHTML = `
-        <div class="item-title">${g.title}</div>
-        <div class="item-desc">${g.desc}</div>
-      `;
-      grid.appendChild(card);
-    });
-  }
-
-  function renderLevels() {
-    const grid = document.getElementById('levelsGrid');
-    grid.innerHTML = '';
-    levelsDifficulty.forEach(l => {
-      const card = document.createElement('div');
-      card.className = `item-card ${l.isTheory ? 'theory' : ''}`;
-      card.onclick = () => {
-        activeLevel = l;
-        if (l.isTheory) showTheoryScreen();
-        else startQuest();
-      };
-      card.innerHTML = `
-        <div class="item-title">${l.title}</div>
-        <div class="item-desc">${l.desc}</div>
-      `;
-      grid.appendChild(card);
-    });
-  }
-
-  function showTheoryScreen() {
-    document.getElementById('screenLevels').classList.add('hidden');
-    document.getElementById('screenTheory').classList.remove('hidden');
-
-    let combinedTheory = '';
-    selectedTopicIds.forEach(id => {
-      const top = topicsData.find(t => t.id === id);
-      combinedTheory += top.theory + '<hr style="border-color: var(--border-color); margin: 20px 0;">';
-    });
-
-    document.getElementById('theoryContent').innerHTML = combinedTheory;
-  }
-
-  function startNextLevelFromTheory() {
-    activeLevel = levelsDifficulty[1];
-    startQuest();
-  }
-
-  function startQuest() {
-    document.getElementById('screenLevels').classList.add('hidden');
-    document.getElementById('screenTheory').classList.add('hidden');
-    document.getElementById('screenGame').classList.remove('hidden');
-
-    // Filter vragen op basis van geselecteerde onderwerpen én gekozen level
-    currentQuestions = questionBank.filter(q => 
-      selectedTopicIds.includes(q.topic) && (q.level === activeLevel.id || !q.level)
-    );
-
-    // Fallback: Als er voor een specifieke combinatie geen lvl3 vragen zijn, gebruik alle vragen van de onderwerpen
-    if (currentQuestions.length === 0) {
-      currentQuestions = questionBank.filter(q => selectedTopicIds.includes(q.topic));
-    }
-
-    // Shuffle de array
-    currentQuestions.sort(() => Math.random() - 0.5);
-
-    // Beperk tot max 15 vragen per sessie
-    currentQuestions = currentQuestions.slice(0, 15);
-
-    if (currentQuestions.length === 0) {
-      alert("Geen vragen gevonden voor deze selectie. Voeg een ander onderwerp toe.");
-      goToStep('topics');
-      return;
-    }
-
-    currentQIndex = 0;
-    hp = 3;
-    score = 0;
-    streak = 0;
-    updateStats();
-    loadQuestion();
-  }
-
-  function loadQuestion() {
-    const q = currentQuestions[currentQIndex];
-
-    document.getElementById('qProgress').innerText = `Vraag ${currentQIndex + 1}/${currentQuestions.length}`;
-    
-    const topicObj = topicsData.find(t => t.id === q.topic);
-    document.getElementById('qCategory').innerText = topicObj ? topicObj.title.toUpperCase() : 'GRAMMAR';
-    
-    document.getElementById('qModeBadge').innerText = activeGameMode.title;
-    document.getElementById('qText').innerText = q.q;
-    
-    document.getElementById('feedbackPanel').style.display = 'none';
-    document.getElementById('nextBtn').classList.add('hidden');
-
-    // Reset weergave van modes
-    document.getElementById('mcBox').classList.add('hidden');
-    document.getElementById('inputBoxContainer').classList.add('hidden');
-    document.getElementById('carGameBox').classList.add('hidden');
-
-    // Bepaal de layout op basis van activeGameMode
-    if (activeGameMode.id === 'car_highway') {
-      setupMarioKartGame(q);
-    } else if (activeGameMode.id === 'speed_run') {
-      setupMultipleChoice(q);
-    } else {
-      setupFillInBlank();
-    }
-  }
-
-  function setupMarioKartGame(q) {
-    document.getElementById('carGameBox').classList.remove('hidden');
-    currentCarLane = 1;
-    
-    const car = document.getElementById('playerCar');
-    car.style.transition = 'none'; // Verwijder animatie voor instant reset naar startpositie
-    car.classList.remove('drive-forward');
-    updateCarPosition();
-    
-    // Herstel de animatie-transition na een korte vertraging en activeer knoppen
-    setTimeout(() => {
-      car.style.transition = 'left 0.22s cubic-bezier(0.2, 0.8, 0.25, 1), bottom 0.5s ease-in, transform 0.5s ease-in, opacity 0.4s 0.1s ease-in';
-      document.querySelectorAll('.controls-row button').forEach(b => b.disabled = false);
-    }, 50);
-
-    // Randomize de opties voor de poortjes
-    let displayOpts = [...q.opts].sort(() => Math.random() - 0.5);
-    
-    for (let i = 0; i < 3; i++) {
-      const gate = document.getElementById(`gate${i}`);
-      gate.innerText = displayOpts[i] || '---';
-      gate.style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; // Reset de poortkleur
-    }
-  }
-
-  function setupMultipleChoice(q) {
-    const mcBox = document.getElementById('mcBox');
-    mcBox.classList.remove('hidden');
-    mcBox.innerHTML = '';
-
-    let displayOpts = [...q.opts].sort(() => Math.random() - 0.5);
-
-    displayOpts.forEach(opt => {
-      const btn = document.createElement('button');
-      btn.className = 'btn-opt';
-      btn.innerText = opt;
-      btn.onclick = () => {
-        // Controleer of de gekozen optie een van de juiste antwoorden (ge-normalized) is.
-        let isCorrect = q.a.some(ans => normalizeText(ans) === normalizeText(opt));
-        document.querySelectorAll('.btn-opt').forEach(b => b.disabled = true);
-        processResult(isCorrect, q.rule, q.a[0]);
-      };
-      mcBox.appendChild(btn);
-    });
-  }
-
-  function setupFillInBlank() {
-    const container = document.getElementById('inputBoxContainer');
-    container.classList.remove('hidden');
-    const input = document.getElementById('userAnswerInput');
-    input.value = '';
-    input.disabled = false;
-    
-    // Kleine timeout om er zeker van te zijn dat het element gerenderd is voor de focus
-    setTimeout(() => {
-      input.focus();
-    }, 50);
-  }
-
-  /**
-   * Verwijdert overbodige spaties, maakt alles kleine letters, 
-   * en trekt verschillende soorten apostrofs gelijk.
-   */
-  function normalizeText(text) {
-    if (!text) return '';
-    return text.toLowerCase().trim()
-      .replace(/['`’]/g, "'") // Maak apostrofs uniform
-      .replace(/\s+/g, ' ');  // Vervang meerdere spaties door 1 spatie
-  }
-
-  function moveCar(dir) {
-    currentCarLane = Math.max(0, Math.min(2, currentCarLane + dir));
-    updateCarPosition();
-  }
-
-  function updateCarPosition() {
-    const car = document.getElementById('playerCar');
-    car.style.left = carPositionsLeft[currentCarLane];
-  }
-
-  function driveDriveAndCheck() {
-    const q = currentQuestions[currentQIndex];
-    const gate = document.getElementById(`gate${currentCarLane}`);
-    const gateText = gate.innerText;
-
-    // Knoppen blokkeren tijdens de animatie zodat je niet dubbel kan klikken
-    document.querySelectorAll('.controls-row button').forEach(b => b.disabled = true);
-    
-    // Auto animatie starten
-    const car = document.getElementById('playerCar');
-    car.classList.add('drive-forward');
-
-    let isCorrect = q.a.some(ans => normalizeText(ans) === normalizeText(gateText));
-    
-    // Wacht tot de auto bij het poortje is (500ms) voordat het antwoord laadt
-    setTimeout(() => {
-      // Poortje kleurt mee ter visuele feedback (groen of rood)
-      gate.style.backgroundColor = isCorrect ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)';
-      
-      processResult(isCorrect, q.rule, q.a[0]);
-    }, 500);
-  }
-
-  function submitInputAnswer() {
-    const q = currentQuestions[currentQIndex];
-    const userVal = document.getElementById('userAnswerInput').value;
-    document.getElementById('userAnswerInput').disabled = true;
-
-    // Check user input against all valid answers in q.a array
-    const normalizedUserVal = normalizeText(userVal);
-    let isCorrect = q.a.some(ans => normalizeText(ans) === normalizedUserVal);
-
-    processResult(isCorrect, q.rule, q.a[0]);
-  }
-
-  function processResult(isCorrect, rule, expectedAns) {
-    const feedbackPanel = document.getElementById('feedbackPanel');
-    feedbackPanel.style.display = 'block';
-
-    if (isCorrect) {
-      score += 30 + (streak * 5); // Combo bonus
-      streak++;
-      feedbackPanel.className = 'feedback-panel success';
-      feedbackPanel.innerHTML = `🎉 <strong>Helemaal goed!</strong><br><span style="font-size:0.9rem">${rule}</span>`;
-    } else {
-      streak = 0;
-      hp--;
-      feedbackPanel.className = 'feedback-panel error';
-      feedbackPanel.innerHTML = `❌ <strong>Helaas!</strong> Het juiste antwoord was: <em>"${expectedAns}"</em>.<br><span style="font-size:0.9rem">${rule}</span>`;
-    }
-
-    updateStats();
-
-    if (hp <= 0) {
-      setTimeout(() => endLevel(false), 1800);
-    } else {
-      const nxtBtn = document.getElementById('nextBtn');
-      nxtBtn.classList.remove('hidden');
-      
-      // Als we in fill-in mode zijn, focus direct op de Volgende knop zodat Enter werkt
-      if(activeGameMode.id === 'fill_in') {
-        nxtBtn.focus();
-      }
-    }
-  }
-
-  function nextQuestion() {
-    currentQIndex++;
-    if (currentQIndex < currentQuestions.length) {
-      loadQuestion();
-    } else {
-      endLevel(true);
-    }
-  }
-
-  function endLevel(victory) {
-    document.getElementById('screenGame').classList.add('hidden');
-    document.getElementById('screenResult').classList.remove('hidden');
-
-    const emoji = document.getElementById('resEmoji');
-    const title = document.getElementById('resTitle');
-    const body = document.getElementById('resBody');
-
-    if (victory) {
-      emoji.innerText = '🏆';
-      title.innerText = 'Level Gehaald!';
-      body.innerText = `Geweldig gedaan! Je bent een Grammar Master! Je eindscore is ${score} punten.`;
-    } else {
-      emoji.innerText = '💀';
-      title.innerText = 'Game Over';
-      body.innerText = `Je levens zijn op. Je hebt ${score} punten gehaald. Oefen nog een keer en verbeter jezelf!`;
-    }
-  }
-
-  function updateStats() {
-    document.getElementById('hpVal').innerText = '❤️'.repeat(Math.max(0, hp));
-    document.getElementById('streakVal').innerText = streak;
-    document.getElementById('scoreVal').innerText = score;
-  }
-
-  window.onload = initApp;
-</script>
-
-</body>
-</html>
+kun je een nieuwe opdracht toe voegen die alle spellen bevat met de volgende vragen:ONDERWERP 1: PRESENT SIMPLE
+ Level 1 — Uitleg + simpele oefening
+ Uitleg
+De Present Simple gebruik je vooral voor dingen die regelmatig gebeuren, gewoontes, feiten en dingen die altijd of meestal waar zijn.
+Bij I, you, we, they gebruik je het hele werkwoord:
+- I play
+- You work
+- They live
+Bij he, she, it komt er meestal -s achter:
+- He plays
+- She works
+- It rains
+Let op bij sommige werkwoorden:
+- go → goes
+- watch → watches
+- study → studies
+Signaalwoorden die vaak bij de Present Simple horen:
+always • usually • often • sometimes • never • every day • every week
+Voorbeelden:
+I play football every Saturday.
+She likes chocolate.
+The sun rises in the east.
+ Simpele oefenvraag
+She ___ to school every day.
+A. go
+B. goes
+C. going
+ Antwoord: B. goes
+ Level 2 — Normale oefeningen
+Vul het werkwoord in
+1. I ___ (play) football every Saturday.
+ Antwoord: play
+1. She ___ (watch) TV every evening.
+ Antwoord: watches
+1. They ___ (live) in Amsterdam.
+ Antwoord: live
+1. He ___ (like) pizza.
+ Antwoord: likes
+1. We ___ (go) to school by bike.
+ Antwoord: go
+1. My brother ___ (study) English at school.
+ Antwoord: studies
+1. The dog ___ (sleep) a lot.
+ Antwoord: sleeps
+1. You ___ (have) breakfast every morning.
+ Antwoord: have
+Maak negatief
+1. She likes cats.
+2. → She ___ cats.
+ Antwoord: She doesn't like cats.
+1. They play tennis.
+2. → They ___ tennis.
+ Antwoord: They don't play tennis.
+Maak een vraag
+1. You like chocolate.
+2. → ___ you ___ chocolate?
+ Antwoord: Do you like chocolate?
+1. He plays football.
+2. → ___ he ___ football?
+ Antwoord: Does he play football?
+ Level 3 — Moeilijke oefeningen
+Hier moet je goed opletten op he/she/it, do/does en de juiste vorm van het werkwoord.
+1. My sister ___ (study) every evening because she ___ (want) good grades.
+ Antwoord: studies / wants
+1. Tom ___ (not like) vegetables, but he ___ (eat) fruit every day.
+ Antwoord: doesn't like / eats
+1. My parents ___ (work) in a hospital and my brother ___ (go) to school nearby.
+ Antwoord: work / goes
+1. The Earth ___ (go) around the Sun.
+ Antwoord: goes
+1. She ___ (have) two brothers, but they ___ (live) in different cities.
+ Antwoord: has / live
+ Grammar Detective
+1.  She go to school every day.
+2. → __________________________
+ Antwoord: She goes to school every day.
+1.  He don't like football.
+2. → __________________________
+ Antwoord: He doesn't like football.
+1.  Does she likes pizza?
+2. → __________________________
+ Antwoord: Does she like pizza?
+1.  My brother studys English.
+2. → __________________________
+ Antwoord: My brother studies English.
+ ONDERWERP 2: PRESENT CONTINUOUS
+ Level 1 — Uitleg + simpele oefening
+ Uitleg
+De Present Continuous gebruik je voor iets dat op dit moment bezig is of rond deze periode gebeurt.
+Je maakt de Present Continuous met:
+am/is/are + werkwoord + -ing
+Bijvoorbeeld:
+- I am playing
+- She is studying
+- We are watching
+- They are running
+Signaalwoorden die vaak bij de Present Continuous horen:
+now • right now • at the moment • today • this week
+Voorbeelden:
+I am doing my homework now.
+She is watching TV at the moment.
+They are playing football.
+ Simpele oefenvraag
+Look! The dog ___ in the garden.
+A. runs
+B. is running
+C. run
+ Antwoord: B. is running
+ Level 2 — Normale oefeningen
+Vul het werkwoord in
+1. I ___ (do) my homework right now.
+ Antwoord: am doing
+1. She ___ (watch) TV at the moment.
+ Antwoord: is watching
+1. They ___ (play) football now.
+ Antwoord: are playing
+1. We ___ (study) for our English test.
+ Antwoord: are studying
+1. He ___ (run) in the park.
+ Antwoord: is running
+1. You ___ (talk) very loudly.
+ Antwoord: are talking
+1. My parents ___ (cook) dinner right now.
+ Antwoord: are cooking
+1. The baby ___ (sleep) at the moment.
+ Antwoord: is sleeping
+Maak negatief
+1. She is watching TV.
+2. → She ___ TV.
+ Antwoord: She isn't watching TV.
+1. They are playing football.
+2. → They ___ football.
+ Antwoord: They aren't playing football.
+Maak een vraag
+1. You are studying English.
+2. → ___ you ___ English?
+ Antwoord: Are you studying English?
+1. He is sleeping.
+2. → ___ he ___?
+ Antwoord: Is he sleeping?
+ Level 3 — Moeilijke oefeningen
+Hier moet je goed opletten op am/is/are, de -ing-vorm en de betekenis van de zin.
+1. Look! The children ___ (run) towards the bus.
+ Antwoord: are running
+1. I ___ (work) on a big school project this week.
+ Antwoord: am working
+1. She ___ (not listen) to the teacher at the moment.
+ Antwoord: isn't listening
+1. Why ___ you ___ (laugh)?
+ Antwoord: are / laughing
+1. My brother ___ (learn) how to play the guitar this month.
+ Antwoord: is learning
+ Grammar Detective
+1.  She is play football now.
+2. → __________________________
+ Antwoord: She is playing football now.
+1.  They are watch TV.
+2. → __________________________
+ Antwoord: They are watching TV.
+1.  I am study English.
+2. → __________________________
+ Antwoord: I am studying English.
+1.  Is he play computer games?
+2. → __________________________
+ Antwoord: Is he playing computer games?
+ ONDERWERP 3: PRESENT SIMPLE VS PRESENT CONTINUOUS
+ Level 1 — Leer de basis
+ Uitleg
+De Present Simple gebruik je voor:
+- gewoontes
+- dingen die regelmatig gebeuren
+- feiten
+- dingen die meestal waar zijn
+Voorbeeld:
+I play football every Saturday.
+De Present Continuous gebruik je voor:
+- iets dat nu gebeurt
+- iets dat op dit moment bezig is
+- iets dat tijdelijk is
+Voorbeeld:
+I am playing football right now.
+ Handige game-regel:
+Gewoonte / regelmatig? →  Present Simple
+Nu / op dit moment? →  Present Continuous
+ Simpele oefenvraag
+Look! She ___ a book right now.
+A. reads
+B. is reading
+C. read
+ Antwoord: B. is reading
+ LEVEL 2 — Oefenen
+ Vul het werkwoord goed in
+1. I usually ___ (walk) to school.
+ Antwoord: walk
+1. I ___ (walk) to school right now.
+ Antwoord: am walking
+1. She ___ (play) tennis every Saturday.
+ Antwoord: plays
+1. She ___ (play) tennis at the moment.
+ Antwoord: is playing
+1. We ___ (watch) TV every evening.
+ Antwoord: watch
+1. We ___ (watch) TV right now.
+ Antwoord: are watching
+1. He ___ (study) English every Monday.
+ Antwoord: studies
+1. He ___ (study) English at the moment.
+ Antwoord: is studying
+1. They ___ (live) in Rotterdam.
+ Antwoord: live
+1. They ___ (stay) with their grandparents this week.
+ Antwoord: are staying
+ Kies de juiste optie
+1. She ___ to school every day.
+A. walks
+B. is walking
+C. walk
+ Antwoord: A. walks
+1. Be quiet! The baby ___.
+A. sleeps
+B. sleep
+C. is sleeping
+ Antwoord: C. is sleeping
+1. My dad usually ___ coffee in the morning.
+A. drinks
+B. is drinking
+C. drink
+ Antwoord: A. drinks
+1. Look! It ___ outside.
+A. rains
+B. is raining
+C. rain
+ Antwoord: B. is raining
+1. I ___ my homework every afternoon.
+A. do
+B. am doing
+C. does
+ Antwoord: A. do
+ Mini-mix
+1. She ___ (read) a book every night.
+ Antwoord: reads
+1. She ___ (read) a book right now.
+ Antwoord: is reading
+1. My parents usually ___ (cook) dinner at home.
+ Antwoord: cook
+1. My parents ___ (cook) dinner at the moment.
+ Antwoord: are cooking
+1. He ___ (wear) glasses every day.
+ Antwoord: wears
+ LEVEL 3 — Challenge Mode
+Nu moet je uit de betekenis en context bepalen welke tense nodig is. Soms staat er geen duidelijk signaalwoord.
+ Vul het werkwoord in
+1. Listen! Someone ___ (sing) upstairs.
+ Antwoord: is singing
+1. My brother usually ___ (play) games after school.
+ Antwoord: plays
+1. Why ___ you ___ (wear) my jacket?
+ Antwoord: are / wearing
+1. I ___ (not understand) this question.
+ Antwoord: don't understand
+1. She ___ (work) in a café this summer.
+ Antwoord: is working
+1. My dad ___ (work) in a hospital.
+ Antwoord: works
+1. The Earth ___ (move) around the Sun.
+ Antwoord: moves
+1. Look! The children ___ (dance).
+ Antwoord: are dancing
+1. He ___ (not usually drink) coffee.
+ Antwoord: doesn't usually drink
+1. We ___ (stay) at a hotel this week.
+ Antwoord: are staying
+ Challenge: kies de juiste tense
+1. Every Sunday, we ___ to our grandparents' house.
+A. go
+B. are going
+ Antwoord: A. go
+1. We can't talk right now. We ___ to our grandparents' house.
+A. go
+B. are going
+ Antwoord: B. are going
+1. She ___ English very well.
+A. speaks
+B. is speaking
+ Antwoord: A. speaks
+1. Listen! She ___ English with a British accent.
+A. speaks
+B. is speaking
+ Antwoord: B. is speaking
+1. Why ___ you ___ so loudly?
+A. do / talk
+B. are / talking
+ Antwoord: B. are / talking
+1. Why ___ you always ___ your homework at the last minute?
+A. do / do
+B. are / doing
+ Antwoord: A. do / do
+ BOSS QUESTION
+Tom usually ___ (walk) to school, but today he ___ (take) the bus because it ___ (rain).
+ Antwoord: walks / is taking / is raining
+Waarom?
+- usually walks → gewoonte → Present Simple
+- today is taking → tijdelijke situatie → Present Continuous
+- is raining → gebeurt nu → Present Continuous
+ Eindbaas-vraag
+I ___ (live) in Amsterdam, but this month I ___ (stay) with my aunt in Utrecht.
+ Antwoord: live / am staying
+Waarom?
+- live → normale, vaste situatie → Present Simple
+- am staying → tijdelijke situatie → Present Continuous
